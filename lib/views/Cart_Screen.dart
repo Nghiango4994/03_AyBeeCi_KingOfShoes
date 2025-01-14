@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/models/gio_hang.dart';
 import 'package:kingofshoes/viewmodels/Cart_ViewModel.dart';
@@ -5,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:kingofshoes/views/CheckOutScreens.dart';
 import 'package:kingofshoes/views/widgets/color_selector.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartScreen extends StatefulWidget {
   final String id;
@@ -15,10 +18,40 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  String? idKhachHang;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserData();
+  }
+
+  Future<void> getUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? userJson = prefs.getString('user');
+    String? token = prefs.getString('token');
+
+    if (userJson != null) {
+      Map<String, dynamic> user = jsonDecode(userJson);
+      idKhachHang = user['id'].toString();
+    }
+
+    if (token != null) {
+      print('Token: $token');
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (idKhachHang == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Giỏ Hàng')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
     return ChangeNotifierProvider(
-      create: (_) => CartViewModel()..fetchCartItems(widget.id),
+      create: (_) => CartViewModel()..fetchCartItems(idKhachHang!),
       child: Scaffold(
         appBar: AppBar(
           title: const Center(child: Text('Giỏ Hàng')),
@@ -28,16 +61,17 @@ class _CartScreenState extends State<CartScreen> {
         backgroundColor: ColorSelectorLightMode.MauNenUngDung,
         body: Consumer<CartViewModel>(
           builder: (context, viewModel, child) {
+            List reversedCartItems =
+                viewModel.cartItems?.reversed?.toList() ?? [];
             return RefreshIndicator(
               onRefresh: () async {
-                await viewModel.fetchCartItems(widget.id);
-                await Future.delayed(
-                    const Duration(seconds: 2)); // Trì hoãn 2 giây
+                await viewModel.fetchCartItems(idKhachHang!);
+                await Future.delayed(const Duration(seconds: 2));
               },
               color: Colors.blue,
               child: viewModel.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : viewModel.cartItems.isEmpty
+                  : reversedCartItems.isEmpty
                       ? ListView(
                           children: const [
                             Center(
@@ -50,10 +84,10 @@ class _CartScreenState extends State<CartScreen> {
                           ],
                         )
                       : ListView.builder(
-                          itemCount: viewModel.cartItems.length,
+                          itemCount: reversedCartItems.length,
                           itemBuilder: (context, index) {
-                            return _buildCartItem(viewModel.cartItems[index],
-                                viewModel, widget.id);
+                            return _buildCartItem(reversedCartItems[index],
+                                viewModel, idKhachHang!);
                           },
                         ),
             );
@@ -67,16 +101,19 @@ class _CartScreenState extends State<CartScreen> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: item.bienTheSanPham.map((bienThe) {
           return Card(
-            // Thêm Card để tạo viền cho sản phẩm
             elevation: 2,
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  Image.network(bienThe.anhSp?.duong_dan_anh ?? '',
-                      width: 80.0),
+                  Image.network(
+                    bienThe.anhSp?.duong_dan_anh ?? '',
+                    width: 80.0,
+                  ),
                   const SizedBox(width: 16.0),
                   Expanded(
                     child: Column(
@@ -84,38 +121,36 @@ class _CartScreenState extends State<CartScreen> {
                       children: [
                         Text(bienThe.ten_bien_the),
                         const SizedBox(height: 4.0),
-                        Text('${bienThe.gia_ban.toString()} VNĐ'),
+                        Text('${bienThe.gia_ban} VNĐ'),
                         const SizedBox(height: 4.0),
-                        Text('Size: ${bienThe.kich_thuoc_id}'),
+                        Text('Size: ${item.kich_thuoc}'),
                       ],
                     ),
                   ),
                   Row(
                     children: [
                       IconButton(
-                        onPressed: () {
-                          setState(() async {
-                            await viewModel.decreaseQuantity(
-                                item.idGioHang, bienThe.id);
-                            viewModel.fetchCartItems(id);
-                          });
+                        onPressed: () async {
+                          await viewModel.decreaseQuantity(
+                              item.idGioHang, bienThe.id);
+                          await viewModel.fetchCartItems(id);
+                          setState(() {});
                         },
                         icon: const Icon(Icons.remove),
                       ),
                       Text('${item.soluong}'),
                       IconButton(
-                        onPressed: () {
-                          setState(() async {
-                            await viewModel.increaseQuantity(
-                                item.idGioHang, bienThe.id);
-                            viewModel.fetchCartItems(id);
-                          });
+                        onPressed: () async {
+                          await viewModel.increaseQuantity(
+                              item.idGioHang, bienThe.id);
+                          await viewModel.fetchCartItems(id);
+                          setState(() {});
                         },
                         icon: const Icon(Icons.add),
                       ),
                       IconButton(
                         onPressed: () {
-                          // Xử lý xóa sản phẩm
+                          // Thêm logic xóa sản phẩm
                         },
                         icon: const Icon(
                           Icons.delete,
@@ -151,11 +186,7 @@ class _CartScreenState extends State<CartScreen> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Subtotal: '),
-                    // Text(
-                    //     "${viewModel.calculateSubtotal()} VNĐ"), // Hiển thị subtotal
-                  ],
+                  children: const [Text('Subtotal: '), Text("... VNĐ")],
                 ),
                 const SizedBox(height: 8.0),
                 Row(
@@ -165,12 +196,7 @@ class _CartScreenState extends State<CartScreen> {
                 const SizedBox(height: 8.0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total Cost: '),
-                    // Text(
-                    //     "${viewModel.calculateTotalCost()} VNĐ",
-                    //     ), // Hiển thị tổng chi phí
-                  ],
+                  children: const [Text('Total Cost: '), Text("... VNĐ")],
                 ),
                 const SizedBox(height: 16.0),
                 SizedBox(

@@ -6,6 +6,7 @@ import 'package:kingofshoes/views/widgets/Provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -19,17 +20,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _addressController = TextEditingController();
 
   bool _isLoading = true;
-  String _errorMessage = "";
   File? _imageFile;
   String? _imageUrl;
-
-  final ImagePicker _picker = ImagePicker();
-
   @override
   void initState() {
     super.initState();
-    _fetchProfileData(); // Gọi API khi màn hình được khởi tạo
+    getUserData();
   }
+
+  Future<void> getUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? userJson = prefs.getString('user');
+    String? token = prefs.getString('token');
+
+    if (userJson != null) {
+      Map<String, dynamic> user = jsonDecode(userJson);
+      _nameController.text = user['ten'].toString() == null
+          ? "chưa cập nhật thông tin"
+          : user['ten'].toString();
+      _emailController.text = user['email'].toString() == null
+          ? "chưa cập nhật thông tin"
+          : user['email'].toString();
+      _phoneController.text = user['sdt'].toString() == null
+          ? "chưa cập nhật thông tin"
+          : user['sdt'].toString();
+      _addressController.text = user['dia_chi'].toString() == null
+          ? "chưa cập nhật thông tin"
+          : user['dia_chi'].toString();
+    }
+
+    if (token != null) {
+      print('Token: $token');
+    }
+    setState(() {});
+  }
+
+  final ImagePicker _picker = ImagePicker();
 
   // Chọn ảnh từ thư viện hoặc camera
   Future<void> _pickImage() async {
@@ -52,50 +78,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final imagePath = '${directory.path}/${path.basename(pickedFile.path)}';
     await File(pickedFile.path).copy(imagePath);
     print('Image saved to: $imagePath');
-  }
-
-  Future<void> _fetchProfileData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final response = await http.get(
-        Uri.parse('${Providers.Url}/thong-tin/1'), // API URL
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        setState(() {
-          _nameController.text = data['ten'] ?? '';
-          _emailController.text = data['email'] ?? '';
-          _phoneController.text = data['sdt'] ?? '';
-          _addressController.text = data['dia_chi'] ?? '';
-          _imageUrl = data['anh_dai_dien'] ?? null; // Lưu URL ảnh từ API
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _errorMessage = "Failed to load profile data.";
-          _isLoading = false;
-        });
-      }
-    } catch (error) {
-      setState(() {
-        _errorMessage = "An error occurred: $error";
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    super.dispose();
   }
 
   @override
@@ -130,112 +112,108 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage.isNotEmpty
-              ? Center(child: Text(_errorMessage))
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Avatar
-                      Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            CircleAvatar(
-                              radius: 65,
-                              backgroundImage: _imageFile != null
-                                  ? FileImage(_imageFile!)
-                                  : _imageUrl != null
-                                      ? NetworkImage(_imageUrl!)
-                                      : NetworkImage(
-                                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ48JWGkSOWJegd_jiLj6C5cz-Ityd6OMLR-w&s'),
-                            ),
-                            Positioned(
-                              bottom: 0,
-                              child: GestureDetector(
-                                onTap: _pickImage,
-                                child: CircleAvatar(
-                                  radius: 15,
-                                  backgroundColor: Colors.blue,
-                                  child: Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Các TextFormField
-                      SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                        child: CustomTextformfield(
-                          labelText: "Họ và Tên",
-                          hintText: "Tên của bạn",
-                          textEditingController: _nameController,
-                          suffixIcon: const Icon(Icons.person),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                        child: CustomTextformfield(
-                          labelText: "Email",
-                          hintText: "Email của bạn",
-                          textEditingController: _emailController,
-                          suffixIcon: const Icon(Icons.email),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                        child: CustomTextformfield(
-                          labelText: "Số điện thoại",
-                          hintText: "Số điện thoại của bạn",
-                          textEditingController: _phoneController,
-                          suffixIcon: const Icon(Icons.phone),
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                        child: CustomTextformfield(
-                          labelText: "Địa chỉ",
-                          hintText: "Địa chỉ của bạn",
-                          textEditingController: _addressController,
-                          suffixIcon: const Icon(Icons.location_on),
-                        ),
-                      ),
-                      SizedBox(height: 40),
-
-                      // Nút Đổi mật khẩu
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Thêm logic đổi mật khẩu sau
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                            padding: EdgeInsets.symmetric(vertical: 18.0),
-                          ),
-                          child: Text(
-                            "Đổi mật khẩu",
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
-                        ),
-                      ),
-                    ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Avatar
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  CircleAvatar(
+                    radius: 65,
+                    backgroundImage: _imageFile != null
+                        ? FileImage(_imageFile!)
+                        : _imageUrl != null
+                            ? NetworkImage(_imageUrl!)
+                            : NetworkImage(
+                                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ48JWGkSOWJegd_jiLj6C5cz-Ityd6OMLR-w&s'),
                   ),
+                  Positioned(
+                    bottom: 0,
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: CircleAvatar(
+                        radius: 15,
+                        backgroundColor: Colors.blue,
+                        child: Icon(
+                          Icons.camera_alt,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Các TextFormField
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: CustomTextformfield(
+                labelText: "Họ và Tên",
+                hintText: "Tên của bạn",
+                textEditingController: _nameController,
+                suffixIcon: const Icon(Icons.person),
+              ),
+            ),
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: CustomTextformfield(
+                labelText: "Email",
+                hintText: "Email của bạn",
+                textEditingController: _emailController,
+                suffixIcon: const Icon(Icons.email),
+              ),
+            ),
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: CustomTextformfield(
+                labelText: "Số điện thoại",
+                hintText: "Số điện thoại của bạn",
+                textEditingController: _phoneController,
+                suffixIcon: const Icon(Icons.phone),
+              ),
+            ),
+            SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: CustomTextformfield(
+                labelText: "Địa chỉ",
+                hintText: "Địa chỉ của bạn",
+                textEditingController: _addressController,
+                suffixIcon: const Icon(Icons.location_on),
+              ),
+            ),
+            SizedBox(height: 40),
+
+            // Nút Đổi mật khẩu
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  // Thêm logic đổi mật khẩu sau
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  padding: EdgeInsets.symmetric(vertical: 18.0),
                 ),
+                child: Text(
+                  "Đổi mật khẩu",
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

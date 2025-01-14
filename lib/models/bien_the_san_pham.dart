@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:kingofshoes/models/anh_sp.dart';
 
 class BienTheSanPham {
@@ -15,6 +13,7 @@ class BienTheSanPham {
   final int ma_giam_gia;
   final double? gia_nhap;
   final AnhSp? anhSp;
+  final String? mo_ta;
 
   BienTheSanPham(
       {required this.id,
@@ -28,7 +27,8 @@ class BienTheSanPham {
       required this.trang_thai,
       required this.ma_giam_gia,
       required this.gia_nhap,
-      required this.anhSp});
+      required this.anhSp,
+      required this.mo_ta});
 
   factory BienTheSanPham.fromJson(Map<String, dynamic> json) {
     return BienTheSanPham(
@@ -44,6 +44,7 @@ class BienTheSanPham {
       ma_giam_gia: json['ma_giam_gia'] ?? 0,
       gia_nhap: json['gia_nhap'] != null ? double.parse(json['gia_nhap']) : 0.0,
       anhSp: json['anh'] != null ? AnhSp.fromJson(json['anh']) : null,
+      mo_ta: json['mo_ta'] ?? '',
     );
   }
 }

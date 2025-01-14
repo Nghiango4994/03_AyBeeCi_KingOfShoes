@@ -90,4 +90,34 @@ class CartViewModel extends ChangeNotifier {
   //   const double shippingCost = 40.90;
   //   return calculateSubtotal() + shippingCost;
   // }
+  Future<void> addProductToCart(
+      int idBienThe, int id_khach_hang, String kich_thuoc) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${Providers.Url}/giohang'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          // Đảm bảo tên khóa đúng
+          'id_bien_the_san_pham': idBienThe, // Đảm bảo tên khóa đúng
+          'id_khach_hang': id_khach_hang, // Đảm bảo tên khóa đúng
+          'so_luong': 1,
+          'kich_thuoc': kich_thuoc,
+        }),
+      );
+      print('id_bien_the: $idBienThe');
+      print('id_khach_hang: $id_khach_hang');
+      print(response.body);
+      if (response.statusCode == 200) {
+        fetchCartItems(id_khach_hang.toString());
+      } else {
+        print(
+            'Failed to add product to cart. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to add product to cart');
+      }
+    } catch (e) {
+      print('Error: ${e.toString()}');
+      throw Exception('Failed to add product to cart');
+    }
+  }
 }

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:kingofshoes/models/bien_the_san_pham.dart';
+import 'package:kingofshoes/viewmodels/Home_ViewModel.dart';
+import 'package:kingofshoes/views/Favourite_Screen.dart';
 import 'package:kingofshoes/views/Home_Screen.dart';
 import 'package:kingofshoes/views/Notification_Screen.dart';
 import 'package:kingofshoes/views/ProfileScreen.dart';
-import 'package:kingofshoes/views/widgets/custom_widgets/custom_CardFavourite.dart';
-import 'package:kingofshoes/models/bien_the_san_pham.dart';
-import 'package:kingofshoes/viewmodels/Home_ViewModel.dart';
+import 'package:kingofshoes/views/widgets/custom_widgets/custom_CardShoesPopular.dart';
 
-class FavouriteScreen extends StatefulWidget {
-  const FavouriteScreen({super.key});
+class SeeAll_Screen extends StatefulWidget {
+  const SeeAll_Screen({super.key});
 
   @override
-  State<FavouriteScreen> createState() => _FavouriteScreenState();
+  State<SeeAll_Screen> createState() => _SeeAll_ScreenState();
 }
 
-class _FavouriteScreenState extends State<FavouriteScreen> {
+class _SeeAll_ScreenState extends State<SeeAll_Screen> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -26,46 +27,25 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Sản Phẩm Yêu Thích",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
+        title: const Text(
+          'Tất Cả Sản Phẩm',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Padding(
-              padding: EdgeInsets.all(10),
-              child: Icon(Icons.favorite_border_sharp),
-            ),
-          ),
-        ],
-        leading: Padding(
-          padding: const EdgeInsets.all(10),
-          child: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back_sharp),
-          ),
-        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
       ),
       body: FutureBuilder<List<BienTheSanPham>>(
-        future: fetchProducts(), // Fetch products for favourites
+        future: fetchProducts(), // Lấy sản phẩm từ API
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-                child: CircularProgressIndicator()); // Loading indicator
+                child: CircularProgressIndicator()); // Hiển thị khi đang tải
           } else if (snapshot.hasError) {
             return Center(
-                child: Text('Error: ${snapshot.error}')); // Error message
+                child: Text('Lỗi: ${snapshot.error}')); // Hiển thị lỗi
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(
-                child: Text('No products available.')); // No data message
+                child: Text('Không có sản phẩm nào.')); // Nếu không có sản phẩm
           } else {
             final products = snapshot.data!;
 
@@ -73,23 +53,24 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
               padding: const EdgeInsets.all(8.0),
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // Number of columns
-                  crossAxisSpacing: 10.0, // Horizontal space between items
-                  mainAxisSpacing: 10.0, // Vertical space between items
-                  childAspectRatio: 0.8, // Aspect ratio for each grid item
+                  crossAxisCount: 2, // Số cột trong lưới
+                  crossAxisSpacing: 10.0, // Khoảng cách ngang giữa các item
+                  mainAxisSpacing: 10.0, // Khoảng cách dọc giữa các item
+                  childAspectRatio:
+                      0.9, // Tỷ lệ chiều rộng/chiều cao của mỗi item
                 ),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   final product = products[index];
                   return InkWell(
                     onTap: () {
-                      // Handle tap on product
+                      // Thực hiện hành động khi nhấn vào sản phẩm
                     },
-                    child: CustomCardfavourite(
-                      imageUrl: product.anhSp?.duong_dan_anh ??
-                          '', // Product image URL
-                      name: product.ten_bien_the, // Product name
-                      price: product.gia_ban.toString(), // Product price
+                    child: CustomCardshoespopular(
+                      imageUrl:
+                          product.anhSp?.duong_dan_anh ?? '', // Ảnh sản phẩm
+                      name: product.ten_bien_the, // Tên sản phẩm
+                      price: product.gia_ban.toString(), // Giá sản phẩm
                     ),
                   );
                 },
@@ -103,7 +84,10 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
         mini: true,
         backgroundColor: Colors.white,
         child: IconButton(
-          onPressed: () {},
+          onPressed: () {
+            // Navigator.push(context,
+            //     MaterialPageRoute(builder: (context) => CartScreen(id: "1")));
+          },
           icon: const Icon(
             Icons.shopping_bag,
             color: Colors.black,
@@ -119,16 +103,16 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              color: _selectedIndex == 0 ? Colors.blue : Colors.black,
-              icon: const Icon(Icons.home),
-              onPressed: () {
-                _onItemTapped(0);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const Home_Screen()),
-                );
-              },
-            ),
+                color: _selectedIndex == 0 ? Colors.blue : Colors.black,
+                icon: const Icon(Icons.home),
+                onPressed: () {
+                  _onItemTapped(0);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Home_Screen()),
+                  );
+                }),
             IconButton(
               color: _selectedIndex == 1 ? Colors.blue : Colors.black,
               icon: const Icon(Icons.favorite),
@@ -137,8 +121,7 @@ class _FavouriteScreenState extends State<FavouriteScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const FavouriteScreen(),
-                  ),
+                      builder: (context) => const FavouriteScreen()),
                 );
               },
             ),

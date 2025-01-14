@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class CustomCardshoespopular extends StatefulWidget {
-  final imageUrl;
-  final name;
-  final price;
+  final String imageUrl;
+  final String name;
+  final String price;
+
   const CustomCardshoespopular({
     super.key,
     required this.imageUrl,
@@ -41,6 +42,20 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
               width: double.infinity,
               height: 150.0,
               fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) {
+                  return child;
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              (loadingProgress.expectedTotalBytes ?? 1)
+                          : null,
+                    ),
+                  );
+                }
+              },
             ),
           ),
           const SizedBox(height: 8.0),
@@ -62,6 +77,8 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
                 ),
                 const SizedBox(height: 4.0),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment
+                      .spaceBetween, // Căn chỉnh các phần tử trong Row
                   children: [
                     Text(
                       '\$${widget.price}',
@@ -70,12 +87,12 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
                         color: Colors.grey,
                       ),
                     ),
-                    const Spacer(),
-                    Positioned(
-                      bottom: 8.0,
-                      right: 8.0,
+                    GestureDetector(
+                      onTap: () {
+                        // Hành động thêm vào giỏ hàng
+                      },
                       child: Container(
-                        padding: const EdgeInsets.all(4.0),
+                        padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           color: Colors.blue,
                           borderRadius: BorderRadius.circular(4.0),
@@ -83,7 +100,7 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
                         child: const Icon(
                           Icons.add_shopping_cart,
                           color: Colors.white,
-                          size: 16.0,
+                          size: 20.0,
                         ),
                       ),
                     ),
