@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/views/Cart_Screen.dart';
+import 'package:kingofshoes/views/Detail_Screen.dart';
 import 'package:kingofshoes/views/Favourite_Screen.dart';
 import 'package:kingofshoes/views/Notification_Screen.dart';
 import 'package:kingofshoes/views/ProfileScreen.dart';
@@ -80,8 +81,10 @@ class _Home_ScreenState extends State<Home_Screen> {
             padding: const EdgeInsets.all(5),
             child: IconButton(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => CartScreen()));
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: (context) => CartScreen(id: "1")));
                 },
                 icon: const Icon(Icons.shopping_bag, color: Colors.black)),
           )
@@ -176,6 +179,7 @@ class _Home_ScreenState extends State<Home_Screen> {
                       label: "Nike",
                       selectedIndex: selectedIndex,
                       index: 0,
+                      brand: '',
                     ),
                     const SizedBox(
                       width: 10,
@@ -184,6 +188,7 @@ class _Home_ScreenState extends State<Home_Screen> {
                       label: "Puma",
                       selectedIndex: selectedIndex,
                       index: 1,
+                      brand: '',
                     ),
                     const SizedBox(
                       width: 10,
@@ -192,6 +197,7 @@ class _Home_ScreenState extends State<Home_Screen> {
                       label: "Under Armour",
                       selectedIndex: selectedIndex,
                       index: 2,
+                      brand: '',
                     ),
                     const SizedBox(
                       width: 10,
@@ -200,6 +206,7 @@ class _Home_ScreenState extends State<Home_Screen> {
                       label: "Adidas",
                       selectedIndex: selectedIndex,
                       index: 3,
+                      brand: '',
                     ),
                     const SizedBox(
                       width: 10,
@@ -208,6 +215,7 @@ class _Home_ScreenState extends State<Home_Screen> {
                       label: "Adidas",
                       selectedIndex: selectedIndex,
                       index: 4,
+                      brand: '',
                     ),
                     const SizedBox(
                       width: 10,
@@ -216,6 +224,7 @@ class _Home_ScreenState extends State<Home_Screen> {
                       label: "Under Armour",
                       selectedIndex: selectedIndex,
                       index: 5,
+                      brand: '',
                     ),
                   ],
                 ),
@@ -242,34 +251,50 @@ class _Home_ScreenState extends State<Home_Screen> {
           ),
           ScrollConfiguration(
             behavior: Scroll(),
-            child: const SingleChildScrollView(
+            child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: SizedBox(
                       width: 200,
-                      child: CustomCardshoespopular(
-                        imageUrl:
-                            "https://kallos.co/cdn/shop/files/giay-nike-air-jordan-1-mid-men-shoes-gym-red_3.jpg?v=1696612420&width=720",
-                        name: "Nike Jordan",
-                        price: "8374839",
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Detail_Screen()));
+                        },
+                        child: const CustomCardshoespopular(
+                          imageUrl:
+                              "https://kallos.co/cdn/shop/files/giay-nike-air-jordan-1-mid-men-shoes-gym-red_3.jpg?v=1696612420&width=720",
+                          name: "Nike Jordan",
+                          price: "8374839",
+                        ),
                       ),
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: SizedBox(
                       width: 200,
-                      child: CustomCardshoespopular(
-                          imageUrl:
-                              "https://kallos.co/cdn/shop/files/giay-nike-air-jordan-1-mid-men-shoes-gym-red_3.jpg?v=1696612420&width=720",
-                          name: "Nike Jordan",
-                          price: "23424"),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Detail_Screen()));
+                        },
+                        child: const CustomCardshoespopular(
+                            imageUrl:
+                                "https://kallos.co/cdn/shop/files/giay-nike-air-jordan-1-mid-men-shoes-gym-red_3.jpg?v=1696612420&width=720",
+                            name: "Nike Jordan",
+                            price: "23424"),
+                      ),
                     ),
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.all(20),
                     child: SizedBox(
                       width: 200,
@@ -306,11 +331,30 @@ class _Home_ScreenState extends State<Home_Screen> {
             padding: const EdgeInsets.all(10),
             child: ScrollConfiguration(
               behavior: Scroll(),
-              child: const SingleChildScrollView(
+              child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
                     Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: SizedBox(
+                        width: 250,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => Detail_Screen()));
+                          },
+                          child: const CustomCardshoesarrivals(
+                              imageUrl:
+                                  "https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/067ea325-267a-4c9c-8148-d62eeee1e329/W+AIR+FORCE+1+%2707+NEXT+NATURE.png",
+                              name: "Nike Air Force 1",
+                              price: "73624"),
+                        ),
+                      ),
+                    ),
+                    const Padding(
                       padding: EdgeInsets.all(20),
                       child: SizedBox(
                         width: 250,
@@ -321,18 +365,7 @@ class _Home_ScreenState extends State<Home_Screen> {
                             price: "73624"),
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.all(20),
-                      child: SizedBox(
-                        width: 250,
-                        child: CustomCardshoesarrivals(
-                            imageUrl:
-                                "https://static.nike.com/a/images/t_PDP_936_v1/f_auto,q_auto:eco/067ea325-267a-4c9c-8148-d62eeee1e329/W+AIR+FORCE+1+%2707+NEXT+NATURE.png",
-                            name: "Nike Air Force 1",
-                            price: "73624"),
-                      ),
-                    ),
-                    Padding(
+                    const Padding(
                       padding: EdgeInsets.all(20),
                       child: SizedBox(
                         width: 250,
@@ -356,8 +389,8 @@ class _Home_ScreenState extends State<Home_Screen> {
         backgroundColor: Colors.white,
         child: IconButton(
           onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => CartScreen()));
+            // Navigator.push(context,
+            //     MaterialPageRoute(builder: (context) => CartScreen(id: "1")));
           },
           icon: const Icon(
             Icons.shopping_bag,

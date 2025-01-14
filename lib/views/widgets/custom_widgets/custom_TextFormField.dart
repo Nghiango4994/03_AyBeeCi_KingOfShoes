@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/views/widgets/color_selector.dart';
 
-class CustomTextformfield extends StatelessWidget {
+class CustomTextformfield extends StatefulWidget {
   final String labelText;
   final String hintText;
   final Widget? suffixIcon;
-
+  final TextEditingController? controller;
+  final bool isPassword; // Thêm thuộc tính này để xác định ô nhập mật khẩu
   const CustomTextformfield({
     super.key,
     required this.labelText,
     required this.hintText,
     required this.suffixIcon,
+    required this.controller,
+    required this.isPassword, // Mặc định là false
   });
 
+  @override
+  State<CustomTextformfield> createState() => _CustomTextformfieldState();
+}
+
+class _CustomTextformfieldState extends State<CustomTextformfield> {
+  bool _isObscured = true;
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(labelText,
+          Text(widget.labelText,
               style: const TextStyle(
                 fontSize: 20,
                 color: ColorSelectorLightMode.MauChuNoiDung,
@@ -31,9 +40,10 @@ class CustomTextformfield extends StatelessWidget {
               }
               return null;
             },
-            controller: TextEditingController(),
+            obscureText: widget.isPassword ? _isObscured : false,
+            controller: widget.controller,
             decoration: InputDecoration(
-              hintText: hintText,
+              hintText: widget.hintText,
               hintStyle:
                   const TextStyle(color: ColorSelectorLightMode.MauChuNoiDung),
               border: OutlineInputBorder(
@@ -63,7 +73,19 @@ class CustomTextformfield extends StatelessWidget {
               filled: true,
               fillColor: ColorSelectorLightMode
                   .MauNenTextFormField, // set màu cho nền TextFormField
-              suffixIcon: suffixIcon,
+              suffixIcon: widget
+                      .isPassword // Chỉ hiển thị nút ẩn/hiện mật khẩu nếu là ô mật khẩu
+                  ? IconButton(
+                      icon: Icon(
+                        _isObscured ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isObscured = !_isObscured;
+                        });
+                      },
+                    )
+                  : null,
             ),
           ),
         ],

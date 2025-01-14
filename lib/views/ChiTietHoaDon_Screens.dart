@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Thêm thư viện intl
-import 'package:kingofshoes/models/ChiTietHoaDon.dart'; // Import tệp models
+import 'package:kingofshoes/models/chi_tiet_hoa_don.dart'; // Import tệp models
 
 class InvoiceDetailScreen extends StatefulWidget {
   final Order order;

@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CustomButtonBrand extends StatefulWidget {
+  final String brand;
   final String label;
   final ValueNotifier<int> selectedIndex;
   final int index;
 
-  const CustomButtonBrand({
-    super.key,
-    required this.label,
-    required this.selectedIndex,
-    required this.index,
-  });
+  const CustomButtonBrand(
+      {super.key,
+      required this.label,
+      required this.selectedIndex,
+      required this.index,
+      required this.brand});
 
   @override
   State<CustomButtonBrand> createState() => _CustomButtonBrandState();
@@ -42,7 +43,7 @@ class _CustomButtonBrandState extends State<CustomButtonBrand> {
                   borderRadius: BorderRadius.circular(
                       25.0), // Adjust the radius to match the image
                   child: SvgPicture.network(
-                    "https://www.svgrepo.com/show/518225/nike.svg",
+                    widget.brand,
                     width: 50,
                     height: 50,
                   ),

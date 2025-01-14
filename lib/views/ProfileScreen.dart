@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kingofshoes/views/widgets/Provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
@@ -20,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = true;
   String _errorMessage = "";
   File? _imageFile;
+  String? _imageUrl;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -36,16 +38,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
+        _imageUrl = null; // Reset _imageUrl khi chọn ảnh mới
       });
 
       // Lưu ảnh vào bộ nhớ trong thiết bị
-      await _saveImageToStorage(pickedFile); // Truyền pickedFile là XFile
+      await _saveImageToStorage(pickedFile);
     }
   }
 
   // Lưu ảnh vào bộ nhớ trong của thiết bị
   Future<void> _saveImageToStorage(XFile pickedFile) async {
-    // Sử dụng XFile thay vì PickedFile
     final directory = await getApplicationDocumentsDirectory();
     final imagePath = '${directory.path}/${path.basename(pickedFile.path)}';
     await File(pickedFile.path).copy(imagePath);
@@ -59,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/thong-tin/1'), // API URL
+        Uri.parse('${Providers.Url}/thong-tin/1'), // API URL
       );
 
       if (response.statusCode == 200) {
@@ -70,6 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _emailController.text = data['email'] ?? '';
           _phoneController.text = data['sdt'] ?? '';
           _addressController.text = data['dia_chi'] ?? '';
+          _imageUrl = data['anh_dai_dien'] ?? null; // Lưu URL ảnh từ API
           _isLoading = false;
         });
       } else {
@@ -142,10 +145,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             CircleAvatar(
                               radius: 65,
-                              backgroundImage: _imageFile == null
-                                  ? NetworkImage(
-                                      'https://via.placeholder.com/150')
-                                  : FileImage(_imageFile!) as ImageProvider,
+                              backgroundImage: _imageFile != null
+                                  ? FileImage(_imageFile!)
+                                  : _imageUrl != null
+                                      ? NetworkImage(_imageUrl!)
+                                      : NetworkImage(
+                                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ48JWGkSOWJegd_jiLj6C5cz-Ityd6OMLR-w&s'),
                             ),
                             Positioned(
                               bottom: 0,

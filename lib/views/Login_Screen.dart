@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:kingofshoes/viewmodels/LoginService.dart';
+import 'package:kingofshoes/views/Home_Screen.dart';
+import 'package:kingofshoes/views/Register_Screen.dart';
 import 'package:kingofshoes/views/widgets/color_selector.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_TextFormField.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
-import 'package:kingofshoes/views/widgets/custom_widgets/custom_buttonSignInWith.dart';
-import 'package:kingofshoes/viewmodels/RegisterService.dart';
+import 'widgets/custom_widgets/custom_buttonSignInWith.dart';
 
-class Register_Screen extends StatefulWidget {
-  const Register_Screen({super.key});
+class Login_Screen extends StatefulWidget {
+  const Login_Screen({super.key});
 
   @override
-  State<Register_Screen> createState() => _RegisterscreenState();
+  State<Login_Screen> createState() => _LoginState();
 }
 
-class _RegisterscreenState extends State<Register_Screen> {
-  final nameController = TextEditingController();
+class _LoginState extends State<Login_Screen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: ColorSelectorLightMode.MauNenUngDung,
-      ),
       backgroundColor: ColorSelectorLightMode.MauNenUngDung,
       body: Center(
         child: SingleChildScrollView(
@@ -31,7 +29,7 @@ class _RegisterscreenState extends State<Register_Screen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                "Create Account",
+                "Hello Again!",
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
@@ -39,23 +37,14 @@ class _RegisterscreenState extends State<Register_Screen> {
                 ),
               ),
               const Text(
-                "Let's Create Account Together",
+                "Welcome Back You've Been Missed!",
                 style: TextStyle(
                   color: Colors.grey,
                 ),
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: 300,
-                child: CustomTextformfield(
-                  controller: nameController,
-                  labelText: "Your Name",
-                  hintText: "Your Name",
-                  suffixIcon: null,
-                  isPassword: false,
-                ),
+              const SizedBox(
+                height: 20,
               ),
-              const SizedBox(height: 20),
               SizedBox(
                 width: 300,
                 child: CustomTextformfield(
@@ -66,7 +55,9 @@ class _RegisterscreenState extends State<Register_Screen> {
                   isPassword: false,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 20,
+              ),
               SizedBox(
                 width: 300,
                 child: CustomTextformfield(
@@ -78,43 +69,50 @@ class _RegisterscreenState extends State<Register_Screen> {
                   isPassword: true,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 20,
+              ),
               SizedBox(
                 width: 300,
                 child: CustomButton(
-                  text: "Sign Up",
-                  onClick: () {
-                    String name = nameController.text;
-                    String email = emailController.text;
-                    String password = passwordController.text;
-                    RegisterService.register(name, email, password, context);
-                  },
-                ),
+                    text: "Sign In",
+                    onClick: () {
+                      Loginservice.login(emailController.text,
+                          passwordController.text, context);
+                    }),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(
+                height: 20,
+              ),
               SizedBox(
                 width: 300,
                 child: CustomButtonSignInWith(
-                  text: "Sign in with Google",
+                  text: "Sign in with google",
                   onClick: () {},
                   IconSignIn:
                       "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png",
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(
+                height: 40,
+              ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Already Have An Account?",
+                    "Don't Have An Account?",
                     style: TextStyle(color: Colors.grey),
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Register_Screen(),
+                          ));
                     },
-                    child: const Text("Sign In",
+                    child: const Text("Sign Up For Free",
                         style: TextStyle(
                             color: ColorSelectorLightMode.MauChuNoiDung,
                             fontWeight: FontWeight.bold)),

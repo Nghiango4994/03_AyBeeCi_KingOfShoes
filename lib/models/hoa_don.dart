@@ -1,40 +1,36 @@
-// lib/models/hoa_don.dart
 class HoaDon {
-  int? HoaDon_Id;
-  int? KhachHang_Id;
-  int? HinhThucThanhToan;
-  DateTime? ngay_lap;
-  int id_Ma_giam_Gia;
+  int? hoaDonId;
+  int? khachHangId;
+  int? hinhThucThanhToan;
+  DateTime? ngayLap;
+  int? idMaGiamGia;
 
   HoaDon({
-    required this.HoaDon_Id,
-    required this.KhachHang_Id,
-    required this.HinhThucThanhToan,
-    required this.id_Ma_giam_Gia,
-    required this.ngay_lap,
+    this.hoaDonId,
+    this.khachHangId,
+    this.hinhThucThanhToan,
+    this.ngayLap,
+    this.idMaGiamGia,
   });
 
-  // Phương thức từ JSON
   factory HoaDon.fromJson(Map<String, dynamic> json) {
     return HoaDon(
-      HoaDon_Id: json['hoa_don_id'],
-      KhachHang_Id: json['khach_hang_id'],
-      HinhThucThanhToan: json['hinh_thuc_thanh_toan'],
-      id_Ma_giam_Gia: json['id_ma_giam_gia'],
-      ngay_lap:
-          json['ngay_lap'] != null ? DateTime.parse(json['ngay_lap']) : null,
+      hoaDonId: json['hoa_don_id'] as int?,
+      khachHangId: json['khach_hang_id'] as int?,
+      hinhThucThanhToan: json['hinh_thuc_thanh_toan'] as int?,
+      idMaGiamGia: json['id_ma_giam_gia'] as int?,
+      ngayLap:
+          json['ngay_lap'] != null ? DateTime.tryParse(json['ngay_lap']) : null,
     );
   }
 
-  // Phương thức chuyển đổi sang JSON
   Map<String, dynamic> toJson() {
     return {
-      'hoa_don_id': HoaDon_Id,
-      'khach_hang_id': KhachHang_Id,
-      'hinh_thuc_thanh_toan': HinhThucThanhToan,
-      'id_ma_giam_gia': id_Ma_giam_Gia,
-      'ngay_lap':
-          ngay_lap?.toIso8601String(), // Chuyển đổi DateTime sang String
+      'hoa_don_id': hoaDonId,
+      'khach_hang_id': khachHangId,
+      'hinh_thuc_thanh_toan': hinhThucThanhToan,
+      'id_ma_giam_gia': idMaGiamGia,
+      'ngay_lap': ngayLap?.toIso8601String(),
     };
   }
 }
