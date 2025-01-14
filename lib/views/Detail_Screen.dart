@@ -21,7 +21,7 @@ class _Detail_ScreenState extends State<Detail_Screen> {
   late Future<List<KichThuocSanPham>> futureSizes;
   String? selectedSize;
   int? idKhachHang;
-
+  TextEditingController quantityController = TextEditingController(text: '1');
   @override
   void initState() {
     super.initState();
@@ -48,6 +48,12 @@ class _Detail_ScreenState extends State<Detail_Screen> {
   }
 
   @override
+  void dispose() {
+    quantityController.dispose(); // Giải phóng controller khi không còn sử dụng
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -69,7 +75,6 @@ class _Detail_ScreenState extends State<Detail_Screen> {
           } else {
             final product = snapshot.data!;
             final imageUrl = product.anhSp?.duong_dan_anh ?? '';
-            print(imageUrl);
 
             return Column(
               children: [
@@ -89,10 +94,7 @@ class _Detail_ScreenState extends State<Detail_Screen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        // Số lượng sản phẩm
-
                         // Product Detail
-
                         Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
@@ -121,6 +123,50 @@ class _Detail_ScreenState extends State<Detail_Screen> {
                                   fontWeight: FontWeight.bold,
                                   color: Colors.black54,
                                 ),
+                              ),
+                              const SizedBox(height: 16),
+                              // Quantity Selector
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove),
+                                    onPressed: () {
+                                      setState(() {
+                                        int currentQuantity = int.tryParse(
+                                                quantityController.text) ??
+                                            1;
+                                        if (currentQuantity > 1) {
+                                          currentQuantity--;
+                                          quantityController.text =
+                                              currentQuantity.toString();
+                                        }
+                                      });
+                                    },
+                                  ),
+                                  Expanded(
+                                    child: TextField(
+                                      controller: quantityController,
+                                      keyboardType: TextInputType.number,
+                                      decoration: const InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        labelText: 'Số lượng',
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.add),
+                                    onPressed: () {
+                                      setState(() {
+                                        int currentQuantity = int.tryParse(
+                                                quantityController.text) ??
+                                            1;
+                                        currentQuantity++;
+                                        quantityController.text =
+                                            currentQuantity.toString();
+                                      });
+                                    },
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -176,22 +222,27 @@ class _Detail_ScreenState extends State<Detail_Screen> {
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: () async {
-                                    // Thay đổi logic thêm vào giỏ hàng
                                     try {
                                       final int idSanPham = product.id;
-                                      print(idSanPham); // ID sản phẩm thực tế
-
+                                      // ID sản phẩm thực tế
+                                      final quantity = int.tryParse(
+                                              quantityController.text) ??
+                                          1;
+                                      print(
+                                          quantity); // Số lượng sản phẩm thực tế
                                       // Gọi phương thức thêm sản phẩm vào giỏ hàng
                                       await CartViewModel().addProductToCart(
-                                          idSanPham,
-                                          idKhachHang!,
-                                          selectedSize!);
+                                        idSanPham,
+                                        idKhachHang!,
+                                        selectedSize!,
+                                        quantity,
+                                      ); // Truyền số lượng vào
                                       //Chuyển hướng sang trang giỏ hàng
                                       Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                              builder: (context) => CartScreen(
-                                                  id: idKhachHang.toString())));
+                                              builder: (context) =>
+                                                  CartScreen()));
                                     } catch (e) {
                                       print('Error adding product to cart: $e');
                                     }
@@ -208,30 +259,39 @@ class _Detail_ScreenState extends State<Detail_Screen> {
                                   ),
                                   child: const Text(
                                     "Thêm vào giỏ hàng",
-                                    style: TextStyle(fontSize: 18),
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
                               ),
-
-                              const SizedBox(
-                                  width: 16), // Space between buttons
-                              // Buy Now Button
+                              const SizedBox(width: 16),
+                              // Xem giỏ hàng Button
                               Expanded(
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    // Chuyển hướng sang trang giỏ hàng
+                                    // Navigator.push(
+                                    //   context,
+                                    //   MaterialPageRoute(
+                                    //     builder: (context) => CartScreen(
+                                    //       id: idKhachHang.toString(),
+                                    //     ),
+                                    //   ),
+                                    // );
+                                  },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors
-                                        .white, // Color to make it stand out
+                                    backgroundColor: Colors.black,
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),
-                                    side: const BorderSide(
-                                      color: Colors.black,
-                                      width: 2,
-                                    ),
                                   ),
                                   child: const Text(
                                     "Mua ngay",
-                                    style: TextStyle(fontSize: 18),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                 ),
                               ),

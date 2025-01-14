@@ -84,10 +84,8 @@ class _HomeScreenState extends State<Home_Screen> {
             padding: const EdgeInsets.all(5),
             child: IconButton(
                 onPressed: () {
-                  // Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (context) => CartScreen(id: "1")));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => CartScreen()));
                 },
                 icon: const Icon(Icons.shopping_bag, color: Colors.black)),
           )
@@ -126,7 +124,7 @@ class _HomeScreenState extends State<Home_Screen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const CartScreen(id: "1")));
+                        builder: (context) => const CartScreen()));
               },
             ),
             const Divider(),
@@ -271,6 +269,7 @@ class _HomeScreenState extends State<Home_Screen> {
                         children: products.map((product) {
                           return InkWell(
                             onTap: () {
+                              print(product.anhSp?.duong_dan_anh ?? '');
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -337,8 +336,8 @@ class _HomeScreenState extends State<Home_Screen> {
         backgroundColor: Colors.white,
         child: IconButton(
           onPressed: () {
-            // Navigator.push(context,
-            //     MaterialPageRoute(builder: (context) => CartScreen(id: "1")));
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => CartScreen()));
           },
           icon: const Icon(
             Icons.shopping_bag,

@@ -54,7 +54,7 @@
 //         .updateOrder(donHang.id, donHang.copyWith(status: "Đã duyệt"));
 //   }
 
-//   void _xemChiTietDonHang(Order donHang) {
+//   void _xemChiTietDonHang(Hoa donHang) {
 //     Navigator.push(
 //       context,
 //       MaterialPageRoute(

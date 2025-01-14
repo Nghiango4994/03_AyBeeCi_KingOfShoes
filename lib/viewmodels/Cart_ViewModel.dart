@@ -91,7 +91,7 @@ class CartViewModel extends ChangeNotifier {
   //   return calculateSubtotal() + shippingCost;
   // }
   Future<void> addProductToCart(
-      int idBienThe, int id_khach_hang, String kich_thuoc) async {
+      int idBienThe, int id_khach_hang, String kich_thuoc, int so_luong) async {
     try {
       final response = await http.post(
         Uri.parse('${Providers.Url}/giohang'),
@@ -100,7 +100,7 @@ class CartViewModel extends ChangeNotifier {
           // Đảm bảo tên khóa đúng
           'id_bien_the_san_pham': idBienThe, // Đảm bảo tên khóa đúng
           'id_khach_hang': id_khach_hang, // Đảm bảo tên khóa đúng
-          'so_luong': 1,
+          'so_luong': so_luong,
           'kich_thuoc': kich_thuoc,
         }),
       );

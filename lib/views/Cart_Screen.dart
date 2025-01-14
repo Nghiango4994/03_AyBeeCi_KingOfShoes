@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:kingofshoes/models/gio_hang.dart';
 import 'package:kingofshoes/viewmodels/Cart_ViewModel.dart';
 import 'package:provider/provider.dart';
@@ -10,8 +10,7 @@ import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartScreen extends StatefulWidget {
-  final String id;
-  const CartScreen({super.key, required this.id});
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -29,15 +28,10 @@ class _CartScreenState extends State<CartScreen> {
   Future<void> getUserData() async {
     final prefs = await SharedPreferences.getInstance();
     String? userJson = prefs.getString('user');
-    String? token = prefs.getString('token');
 
     if (userJson != null) {
       Map<String, dynamic> user = jsonDecode(userJson);
       idKhachHang = user['id'].toString();
-    }
-
-    if (token != null) {
-      print('Token: $token');
     }
     setState(() {});
   }
@@ -98,72 +92,60 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCartItem(GioHang item, CartViewModel viewModel, String id) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: item.bienTheSanPham.map((bienThe) {
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Image.network(
+              item.bienTheSanPham.first.anhSp?.duong_dan_anh ?? '',
+              width: 80.0,
+            ),
+            const SizedBox(width: 16.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.network(
-                    bienThe.anhSp?.duong_dan_anh ?? '',
-                    width: 80.0,
-                  ),
-                  const SizedBox(width: 16.0),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(bienThe.ten_bien_the),
-                        const SizedBox(height: 4.0),
-                        Text('${bienThe.gia_ban} VNĐ'),
-                        const SizedBox(height: 4.0),
-                        Text('Size: ${item.kich_thuoc}'),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () async {
-                          await viewModel.decreaseQuantity(
-                              item.idGioHang, bienThe.id);
-                          await viewModel.fetchCartItems(id);
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.remove),
-                      ),
-                      Text('${item.soluong}'),
-                      IconButton(
-                        onPressed: () async {
-                          await viewModel.increaseQuantity(
-                              item.idGioHang, bienThe.id);
-                          await viewModel.fetchCartItems(id);
-                          setState(() {});
-                        },
-                        icon: const Icon(Icons.add),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          // Thêm logic xóa sản phẩm
-                        },
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
+                  Text(item.bienTheSanPham.first.ten_bien_the),
+                  const SizedBox(height: 4.0),
+                  Text(
+                      '${formatCurrency(item.bienTheSanPham.first.gia_ban)} VNĐ'),
+                  const SizedBox(height: 4.0),
+                  Text('Số lượng: ${item.soluong}'),
                 ],
               ),
             ),
-          );
-        }).toList(),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () async {
+                    await viewModel.decreaseQuantity(
+                        item.idGioHang, item.id_bien_the);
+                    await viewModel.fetchCartItems(id);
+                  },
+                  icon: const Icon(Icons.remove),
+                ),
+                Text('${item.soluong}'),
+                IconButton(
+                  onPressed: () async {
+                    await viewModel.increaseQuantity(
+                        item.idGioHang, item.id_bien_the);
+                    await viewModel.fetchCartItems(id);
+                  },
+                  icon: const Icon(Icons.add),
+                ),
+                IconButton(
+                  onPressed: () {
+                    // Logic xóa sản phẩm
+                  },
+                  icon: const Icon(Icons.delete, color: Colors.grey),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -171,6 +153,8 @@ class _CartScreenState extends State<CartScreen> {
   Widget _buildBottomNavigationBar(BuildContext context) {
     return Consumer<CartViewModel>(
       builder: (context, viewModel, child) {
+        double totalCost = calculateTotal(viewModel.cartItems ?? []);
+        String formattedTotalCost = formatCurrency(totalCost);
         return ClipRRect(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20.0),
@@ -186,24 +170,27 @@ class _CartScreenState extends State<CartScreen> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [Text('Subtotal: '), Text("... VNĐ")],
-                ),
-                const SizedBox(height: 8.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [Text('Shipping: '), Text("40.90 VNĐ")],
-                ),
-                const SizedBox(height: 8.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [Text('Total Cost: '), Text("... VNĐ")],
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text('Tổng cộng:',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text('$formattedTotalCost VNĐ',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16.0),
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: CustomButton(
-                    text: "Checkout",
+                    text: "Thanh toán",
                     onClick: () {
                       Navigator.push(
                         context,
@@ -219,5 +206,20 @@ class _CartScreenState extends State<CartScreen> {
         );
       },
     );
+  }
+
+  double calculateTotal(List<GioHang> cartItems) {
+    double total = 0;
+    for (var item in cartItems) {
+      for (var bienThe in item.bienTheSanPham) {
+        total += bienThe.gia_ban.toDouble() * item.soluong;
+      }
+    }
+    return total;
+  }
+
+  String formatCurrency(double value) {
+    final formatter = NumberFormat('#,##0', 'vi_VN');
+    return formatter.format(value);
   }
 }
