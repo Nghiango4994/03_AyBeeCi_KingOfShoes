@@ -17,8 +17,7 @@ class PictureProductsController extends Controller
             'data'    => $items
         ]);
     }
-    
-    // Tạo giỏ hàng mới
+            
     public function create(Request $request) 
     {
         if (empty($request->id)) {

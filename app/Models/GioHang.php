@@ -11,7 +11,7 @@ class GioHang extends Model {
     protected $table = 'gio_hang';
     protected $primaryKey = 'id_gio_hang';
     public $timestamps = false;
-    protected $fillable = ['id_gio_hang','id_khach_hang','so_luong', 'ngay_tao','id_bien_the_san_pham'];
+    protected $fillable = ['id_gio_hang','id_khach_hang','so_luong', 'ngay_tao','id_bien_the_san_pham','kich_thuoc'];
     public function bienthesanpham()
     {
         return $this->hasMany(BienTheSanPham::class, 'id','id_bien_the_san_pham');

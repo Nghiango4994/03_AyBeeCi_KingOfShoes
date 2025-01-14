@@ -50,7 +50,8 @@ use Illuminate\Support\Facades\Route;
     // Cart Routes
     use App\Http\Controllers\CartController;
       //  Route::middleware('auth:sanctum')->group(function () { 
-            Route::post('/giohang/thaydoisoluong', [CartController::class, 'thaydoisoluong']);
+            Route::post('/giohang/tang', [CartController::class, 'tang']); 
+            Route::post('/giohang/giam', [CartController::class, 'giam']);
             Route::get('giohang', [CartController::class, 'getAll']); // Giỏ hàng của người dùng
             Route::post('giohang', [CartController::class, 'create']); // Thêm sản phẩm vào giỏ hàng
             Route::get('giohang/{id}', [CartController::class, 'getCart']); // Chi tiết sản phẩm

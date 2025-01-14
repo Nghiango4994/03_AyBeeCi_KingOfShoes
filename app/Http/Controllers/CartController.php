@@ -22,24 +22,41 @@ class CartController extends Controller
     }
 
     // Tạo giỏ hàng mới
-    public function create(Request $request)
+      public function create(Request $request)
     {
-        if (empty($request->id_gio_hang)) {
+        \Log::info($request->all());
+
+        if (empty($request->id_khach_hang)) {
             return response()->json([
                 'success' => false,
                 'message' => "Please input customer ID!"
             ]);
         }
-
+    
+        // Lấy giá trị từ request
+        $kich_thuoc = $request->kich_thuoc;
+        $id_khach_hang = $request->id_khach_hang; // Lấy id_khach_hang từ request
+        $so_luong = $request->so_luong ?? 1; // Lấy so_luong từ request, mặc định là 1 nếu không có
+        $id_bien_the_san_pham = $request->id_bien_the_san_pham; // Lấy id_bien_the_san_pham từ request
+    
+        // Kiểm tra xem id_bien_the_san_pham có được cung cấp không
+        if (empty($id_bien_the_san_pham)) {
+            return response()->json([
+                'success' => false,
+                'message' => "Please input product variant ID!"
+            ]);
+        }
+    
+        // Tạo mới giỏ hàng
         $gioHang = GioHang::create([
-            'id_khach_hang' => $request->id_khach_hang,
-            'id_khach_hang'    => $request->id_khach_hang,
-            'id_sanpham' => $request->id_sanpham,
-            'SoLuong' => $request->SoLuong,
-            'tong_don_gia' => $request->tong_don_gia,
-
+            'id_khach_hang' => $id_khach_hang,
+            'so_luong' => $so_luong,
+            'ngay_tao' => now(), // Hoặc giá trị ngày bạn muốn
+            'id_bien_the_san_pham' => $id_bien_the_san_pham, // Thêm trường này
+            'kich_thuoc' => $kich_thuoc
         ]);
-
+    
+        // Kiểm tra kết quả tạo giỏ hàng
         if (!empty($gioHang)) {
             return response()->json([
                 'success' => true,
@@ -47,13 +64,12 @@ class CartController extends Controller
                 'data'    => $gioHang
             ]);
         }
-
+    
         return response()->json([
             'success' => false,
             'message' => 'Have error while creating new cart!'
         ]);
     }
-
     // Lấy giỏ hàng theo ID
 public function getCart($id)
 {
@@ -95,21 +111,34 @@ public function getCart($id)
     }
 
 
-     public function thaydoisoluong(Request $request)
+     public function tang(Request $request)
     {
         $idGioHang = $request->input('idGioHang');
         $idBienThe = $request->input('idBienThe');
-        $so_luong = $request->input('so_luong');
-        // Logic để tăng số lượng sản phẩm trong giỏ hàng
-        // Ví dụ: Tìm sản phẩm trong giỏ hàng và tăng số lượng
         $cartItem = GioHang::where('id_gio_hang', $idGioHang)
                         ->where('id_bien_the_san_pham', $idBienThe)
                         ->first();
         if ($cartItem) {
-           if($cartItem->so_luong <= 1 ||$so_luong <= 1 ){
+             $cartItem->so_luong += 1;
+            $cartItem->save();
+            return response()->json(['success' => true, 'data' => $cartItem], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'Item not found'], 404);
+        }
+    }
+
+     public function giam(Request $request)
+    {
+        $idGioHang = $request->input('idGioHang');
+        $idBienThe = $request->input('idBienThe');
+        $cartItem = GioHang::where('id_gio_hang', $idGioHang)
+                        ->where('id_bien_the_san_pham', $idBienThe)
+                        ->first();
+        if ($cartItem) {
+           if($cartItem->so_luong <= 1){
                 $cartItem->so_luong = 1;
             }else{
-                $cartItem->so_luong = $so_luong;
+                 $cartItem->so_luong -= 1;
             }
             $cartItem->save();
             return response()->json(['success' => true, 'data' => $cartItem], 200);

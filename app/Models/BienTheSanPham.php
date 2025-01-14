@@ -13,7 +13,7 @@ class BienTheSanPham extends Model{
     public $timestamps =  false;
     protected $table = 'bien_the_san_pham';
     protected $primaryKey = 'id';
-    protected $fillable = ['id','ten_bien_the','san_pham_id','mau_id','kich_thuoc_id','so_luong','gia_ban','id_anh','trang_thai','ma_giam_gia','gia_nhap'];
+    protected $fillable = ['id','ten_bien_the','san_pham_id','mau_id','kich_thuoc_id','so_luong','gia_ban','id_anh','trang_thai','ma_giam_gia','gia_nhap','mo_ta'];
     public function anh()
     {
         return $this->belongsTo(AnhSanPham::class, 'id_anh');
