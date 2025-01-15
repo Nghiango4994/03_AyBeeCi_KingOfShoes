@@ -6,6 +6,7 @@ import 'package:kingofshoes/views/Cart_Screen.dart';
 import 'package:kingofshoes/views/CheckOutScreens.dart';
 import 'package:kingofshoes/views/Detail_Screen.dart';
 import 'package:kingofshoes/views/Favourite_Screen.dart';
+import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/Notification_Screen.dart';
 import 'package:kingofshoes/views/ProfileScreen.dart';
 import 'package:kingofshoes/views/SeeAll_Screen.dart';
@@ -26,11 +27,27 @@ class _HomeScreenState extends State<Home_Screen> {
   final ValueNotifier<int> selectedIndex = ValueNotifier<int>(-1);
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _selectedIndex = 0;
-
+  String? email;
+  String? ten;
+  String? anh;
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  Future<void> _loadUserData() async {
+    final userData = await LoginService.getUserData();
+    if (userData != null) {
+      setState(() {
+        email = userData['email'].toString();
+        ten = userData['ten'].toString();
+        anh = userData['anh_user'].toString();
+        print("email là : $email");
+      });
+    } else {
+      // Hiển thị dialog thông báo
+    }
   }
 
   @override
@@ -38,44 +55,20 @@ class _HomeScreenState extends State<Home_Screen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Địa chỉ",
-                    style: TextStyle(color: Colors.grey, fontSize: 10),
-                  ),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_pin,
-                        color: Colors.red,
-                      ),
-                      Text(
-                        "TP.Hồ Chí Minh",
-                        style: TextStyle(
-                            color: ColorSelectorLightMode.MauChuNoiDung,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
+        title: Text(
+          "Trang Chủ",
+          style: TextStyle(
+              color: ColorSelectorLightMode.MauChuNoiDung,
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
         ),
+        centerTitle: true,
         leading: Padding(
           padding: const EdgeInsets.all(5),
           child: IconButton(
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
+              _loadUserData();
             },
             icon: const Icon(Icons.menu),
           ),
@@ -96,12 +89,12 @@ class _HomeScreenState extends State<Home_Screen> {
       drawer: Drawer(
         child: Column(
           children: [
-            const UserAccountsDrawerHeader(
-              accountName: Text('Alisson Becker'),
-              accountEmail: Text('alisson@example.com'),
+            UserAccountsDrawerHeader(
+              accountName: Text('${ten == null ? '' : ten}'),
+              accountEmail: Text('${email == null ? '' : email}'),
               currentAccountPicture: CircleAvatar(
                 backgroundImage: NetworkImage(
-                    'https://scontent.fsgn17-1.fna.fbcdn.net/v/t39.30808-6/293329717_1226220441540953_5971881406164118209_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEpDmVK6NJFghZv3KtqypHhAsCoGtD0e2cCwKga0PR7Z69yWfRMO0sEWS-aIBHEthR_BqaoyJckSJ5oXPQAyW3y&_nc_ohc=JsPXlMcfuTwQ7kNvgG7o9dh&_nc_zt=23&_nc_ht=scontent.fsgn17-1.fna&_nc_gid=AnJ_Hrb7r0c4i_0GwGc3Dw8&oh=00_AYDmWa6655OGx-QMAxJGPBr1b4zjefYDPGwDKQQFFAdhvA&oe=6774744A'),
+                    '${anh == null ? 'https://w7.pngwing.com/pngs/527/663/png-transparent-logo-person-user-person-icon-rectangle-photography-computer-wallpaper.png' : anh}'),
               ),
               decoration: BoxDecoration(
                 color: Colors.black,
@@ -139,12 +132,12 @@ class _HomeScreenState extends State<Home_Screen> {
                         builder: (context) => const FavouriteScreen()));
               },
             ),
-            // const Divider(),
-            // ListTile(
-            //   leading: const Icon(Icons.list),
-            //   title: const Text('Đặt Hàng'),
-            //   onTap: () {},
-            // ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.list),
+              title: const Text('Hóa Đơn'),
+              onTap: () {},
+            ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.notifications),
@@ -158,10 +151,18 @@ class _HomeScreenState extends State<Home_Screen> {
             ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('Đăng Xuất'),
+              leading: Icon(ten == null ? Icons.login : Icons.logout),
+              title: Text(ten == null ? 'Đăng Nhập' : 'Đăng Xuất'),
               onTap: () async {
-                await LoginService.clearUserData();
+                if (ten != null) {
+                  await LoginService.clearUserData();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => Home_Screen()));
+                } else {
+                  await LoginService.clearUserData();
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => Login_Screen()));
+                }
               },
             ),
           ],

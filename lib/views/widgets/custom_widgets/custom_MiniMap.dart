@@ -79,8 +79,8 @@ class _MapScreenState extends State<CustomMinimap> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20.0),
       child: Container(
-        width: 400,
-        height: 200,
+        width: double.infinity,
+        height: 300,
         child: Stack(
           children: [
             GoogleMap(
@@ -99,7 +99,7 @@ class _MapScreenState extends State<CustomMinimap> {
               },
             ),
             Positioned(
-              bottom: 100,
+              top: 10,
               right: 10,
               child: FloatingActionButton(
                 onPressed: _getCurrentLocation,

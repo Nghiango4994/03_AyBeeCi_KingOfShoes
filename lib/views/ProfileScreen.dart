@@ -2,7 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kingofshoes/viewmodels/LoginService.dart';
+import 'package:kingofshoes/views/Home_Screen.dart';
+import 'package:kingofshoes/views/Login_Screen.dart';
+import 'package:kingofshoes/views/RecoveryPW_Screen.dart';
 import 'package:kingofshoes/views/widgets/Provider.dart';
+import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
@@ -18,41 +23,73 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _Default = TextEditingController();
 
   bool _isLoading = true;
   File? _imageFile;
   String? _imageUrl;
+  String? anh;
   @override
   void initState() {
     super.initState();
-    getUserData();
+    _loadUserData();
   }
 
-  Future<void> getUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? userJson = prefs.getString('user');
-    String? token = prefs.getString('token');
-
-    if (userJson != null) {
-      Map<String, dynamic> user = jsonDecode(userJson);
-      _nameController.text = user['ten'].toString() == null
-          ? "chưa cập nhật thông tin"
-          : user['ten'].toString();
-      _emailController.text = user['email'].toString() == null
-          ? "chưa cập nhật thông tin"
-          : user['email'].toString();
-      _phoneController.text = user['sdt'].toString() == null
-          ? "chưa cập nhật thông tin"
-          : user['sdt'].toString();
-      _addressController.text = user['dia_chi'].toString() == null
-          ? "chưa cập nhật thông tin"
-          : user['dia_chi'].toString();
+  Future<void> _loadUserData() async {
+    _Default.text = "Bạn chưa nhập thông tin";
+    final user = await LoginService.getUserData();
+    _Default.text = _Default.text;
+    if (user != null) {
+      setState(() {
+        _nameController.text =
+            user['ten'] == null ? _Default.text : user['ten'].toString();
+        _emailController.text =
+            user['email'] == null ? _Default.text : user['email'].toString();
+        _phoneController.text =
+            user['sdt'] == null ? _Default.text : user['sdt'].toString();
+        _addressController.text = user['dia_chi'] == null
+            ? _Default.text
+            : user['dia_chi'].toString();
+        anh = user['anh_user'] == null
+            ? _Default.text
+            : user['anh_user'].toString();
+      });
+    } else {
+      // Hiển thị dialog thông báo
+      _showLoginDialog();
     }
+  }
 
-    if (token != null) {
-      print('Token: $token');
-    }
-    setState(() {});
+  void _showLoginDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Thông báo'),
+          content: const Text('Bạn cần đăng nhập để sử dụng chức năng này.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Đăng nhập'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => Login_Screen()),
+                );
+              },
+            ),
+            TextButton(
+              child: const Text('Hủy'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => Home_Screen()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   final ImagePicker _picker = ImagePicker();
@@ -125,8 +162,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     radius: 65,
                     backgroundImage: _imageFile != null
                         ? FileImage(_imageFile!)
-                        : _imageUrl != null
-                            ? NetworkImage(_imageUrl!)
+                        : anh != null
+                            ? NetworkImage(anh == null ? "" : anh.toString())
                             : NetworkImage(
                                 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ48JWGkSOWJegd_jiLj6C5cz-Ityd6OMLR-w&s'),
                   ),
@@ -155,7 +192,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CustomTextformfield(
                 labelText: "Họ và Tên",
                 hintText: "Tên của bạn",
-                textEditingController: _nameController,
+                textEditingController:
+                    _nameController == null ? _Default : _nameController,
                 suffixIcon: const Icon(Icons.person),
               ),
             ),
@@ -165,7 +203,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CustomTextformfield(
                 labelText: "Email",
                 hintText: "Email của bạn",
-                textEditingController: _emailController,
+                textEditingController:
+                    _emailController == null ? _Default : _emailController,
                 suffixIcon: const Icon(Icons.email),
               ),
             ),
@@ -174,8 +213,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 30.0),
               child: CustomTextformfield(
                 labelText: "Số điện thoại",
-                hintText: "Số điện thoại của bạn",
-                textEditingController: _phoneController,
+                hintText: "Số điện thoại của bạn",
+                textEditingController:
+                    _phoneController == null ? _Default : _phoneController,
                 suffixIcon: const Icon(Icons.phone),
               ),
             ),
@@ -185,7 +225,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CustomTextformfield(
                 labelText: "Địa chỉ",
                 hintText: "Địa chỉ của bạn",
-                textEditingController: _addressController,
+                textEditingController:
+                    _addressController == null ? _Default : _addressController,
                 suffixIcon: const Icon(Icons.location_on),
               ),
             ),
@@ -193,24 +234,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             // Nút Đổi mật khẩu
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Thêm logic đổi mật khẩu sau
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  padding: EdgeInsets.symmetric(vertical: 18.0),
-                ),
-                child: Text(
-                  "Đổi mật khẩu",
-                  style: TextStyle(color: Colors.white, fontSize: 14),
-                ),
-              ),
-            ),
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                child: CustomButton(
+                    text: "Đổi Mật Khẩu",
+                    onClick: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => RecoveryPassword_Screen()));
+                    })),
           ],
         ),
       ),

@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:kingofshoes/models/gio_hang.dart';
 import 'package:kingofshoes/viewmodels/Cart_ViewModel.dart';
 import 'package:kingofshoes/viewmodels/LoginService.dart';
+import 'package:kingofshoes/views/CheckOutScreens.dart';
+import 'package:kingofshoes/views/Home_Screen.dart';
 import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:provider/provider.dart';
 import 'package:kingofshoes/views/widgets/color_selector.dart';
@@ -61,6 +63,9 @@ class _CartScreenState extends State<CartScreen> {
               child: const Text('Hủy'),
               onPressed: () {
                 Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => Home_Screen()),
+                );
               },
             ),
           ],
@@ -248,8 +253,14 @@ class _CartScreenState extends State<CartScreen> {
               height: 50,
               child: CustomButton(
                 text: "Thanh toán",
+                enabled: _selectedTotal > 0, // Kiểm tra trạng thái
                 onClick: () {
-                  // Xử lý sự kiện thanh toán
+                  if (_selectedTotal > 0) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => CheckoutScreen()),
+                    );
+                  }
                 },
               ),
             ),
