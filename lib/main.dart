@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kingofshoes/views/CheckOutScreens.dart';
+import 'package:kingofshoes/views/Home_Screen.dart';
 import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/ProfileScreen.dart';
 
@@ -13,7 +15,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login_Screen(),
+      home: Home_Screen(),
     );
   }
 }

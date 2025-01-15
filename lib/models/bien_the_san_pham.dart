@@ -6,7 +6,7 @@ class BienTheSanPham {
   final String ten_bien_the;
   final int mau_id;
   final int kich_thuoc_id;
-  final int so_luong;
+  int so_luong;
   final double gia_ban;
   final int id_anh;
   final String trang_thai;

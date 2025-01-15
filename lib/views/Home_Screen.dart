@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/models/bien_the_san_pham.dart';
 import 'package:kingofshoes/viewmodels/Home_ViewModel.dart';
+import 'package:kingofshoes/viewmodels/LoginService.dart';
 import 'package:kingofshoes/views/Cart_Screen.dart';
 import 'package:kingofshoes/views/CheckOutScreens.dart';
 import 'package:kingofshoes/views/Detail_Screen.dart';
@@ -159,9 +160,8 @@ class _HomeScreenState extends State<Home_Screen> {
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text('Đăng Xuất'),
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CheckoutScreen()));
+              onTap: () async {
+                await LoginService.clearUserData();
               },
             ),
           ],

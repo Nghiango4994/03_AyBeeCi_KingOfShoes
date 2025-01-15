@@ -82,14 +82,23 @@ class CartViewModel extends ChangeNotifier {
     }
   }
 
-  // double calculateSubtotal() {
-  //   return _cartItems.fold(0, (sum, item) => sum + ${item.} * item.soluong);
-  // }
+  Future<void> deleteItem(int itemId) async {
+    final url = '${Providers.Url}/giohang/$itemId'; // Địa chỉ API của bạn
 
-  // double calculateTotalCost() {
-  //   const double shippingCost = 40.90;
-  //   return calculateSubtotal() + shippingCost;
-  // }
+    final response = await http.delete(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('cart deleted successfully.');
+    } else {
+      print('Failed to delete cart. Status code: ${response.statusCode}');
+    }
+  }
+
   Future<void> addProductToCart(
       int idBienThe, int id_khach_hang, String kich_thuoc, int so_luong) async {
     try {

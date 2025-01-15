@@ -77,7 +77,7 @@ class _LoginState extends State<Login_Screen> {
                 child: CustomButton(
                     text: "Sign In",
                     onClick: () {
-                      Loginservice.login(emailController.text,
+                      LoginService.login(emailController.text,
                           passwordController.text, context);
                     }),
               ),
