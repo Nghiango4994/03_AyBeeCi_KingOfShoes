@@ -121,7 +121,9 @@ use App\Http\Controllers\CategoryProductsController;
     Route::delete('thong-tin/{id}', [ThongTinController::class, 'destroy']);
     Route::get('thong-tin/{id}/check-admin', [ThongTinController::class, 'checkAdmin']);
     Route::post('thong-tin/login', [ThongTinController::class, 'login']);
+    Route::post('thong-tin/{id}/forgot-password', [ThongTinController::class, 'ChangePassword']);
     Route::post('thong-tin/register', [ThongTinController::class, 'register']);
+     Route::get('thong-tin/logout', [ThongTinController::class, 'logout']);
 
     // Thanh toán
     use App\Http\Controllers\TrangThaiThanhToanController;

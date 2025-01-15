@@ -40,6 +40,14 @@ public function login(Request $request)
         'token' => $token,
     ]);
 }
+public function logout(Request $request)
+{
+    $request->user()->token()->revoke();
+
+    return response()->json([
+        'message' => 'Successfully logged out'
+    ]);
+}
 
 public function register(Request $request)
 {
@@ -143,5 +151,16 @@ public function register(Request $request)
             return response()->json(['message' => 'Not Found'], 404);
         }
     }
+    
+    public function ChangePassWord($id, Request $request){
+    $user = ThongTin::find($id);
+    if (!$user) {
+        return response()->json(['message' => 'Not Found'], 404);
+    }
+    $user->update([
+        'mat_khau' => bcrypt($request->mat_khau) // Mã hóa mật khẩu
+    ]);
+    return response()->json($user); // Trả về thông tin người dùng sau khi cập nhật 
+}
 }
 
