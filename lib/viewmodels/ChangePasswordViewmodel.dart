@@ -5,24 +5,24 @@ import 'package:kingofshoes/models/thong_tin.dart';
 import 'package:kingofshoes/views/widgets/Provider.dart';
 
 class ChangePasswordViewmodel {
-  Future<ThongTin> changePassword(String idkhachhang, String matkhau) async {
+  Future<ThongTin> changePassword(
+      String idKhachHang, String matKhauCu, String matKhauMoi) async {
     final url =
-        Uri.parse('${Providers.Url}/thong-tin/$idkhachhang/forgot-password');
+        Uri.parse('${Providers.Url}/thong-tin/$idKhachHang/forgot-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'idkhachhang': idkhachhang,
-        'mat_khau': matkhau,
+        'id_khach_hang': idKhachHang, // Gửi id khách hàng
+        'mat_khau': matKhauCu, // Gửi mật khẩu cũ
+        'mat_khau_moi': matKhauMoi, // Gửi mật khẩu mới
       }),
     );
-    print(idkhachhang);
-    print(matkhau);
-    print(response.body);
+
     if (response.statusCode == 200) {
       return ThongTin.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to change password: ${response.body}');
+      throw Exception('Failed to change password');
     }
   }
 }
