@@ -58,12 +58,12 @@ use Illuminate\Support\Facades\Route;
             Route::delete('giohang/{id}', [CartController::class, 'delete']); // Xóa sản phẩm khỏi giỏ hàng
     //   });
     // DetailInvoice Routes
-    use App\Http\Controllers\DetailInvoiceController;
-    Route::get('chitiethoadon', [DetailInvoiceController::class, 'getAll']); 
-    Route::get('chitiethoadon/{code}', [DetailInvoiceController::class, 'getChiTietHoaDon']);
-    Route::post('chitiethoadon', [DetailInvoiceController::class, 'create']);
-    Route::delete('chitiethoadon/{code}', [DetailInvoiceController::class, 'delete']);
-    Route::put('chitiethoadon/{id}', [DetailInvoiceController::class, 'update']);
+    use App\Http\Controllers\ChiTietHoaDonController;
+    Route::get('chitiethoadon', [ChiTietHoaDonController::class, 'getAll']); 
+    Route::get('chitiethoadon/{code}', [ChiTietHoaDonController::class, 'getChiTietHoaDon']);
+    Route::post('chitiethoadon', [ChiTietHoaDonController::class, 'create']);
+    Route::delete('chitiethoadon/{code}', [ChiTietHoaDonController::class, 'delete']);
+    Route::put('chitiethoadon/{id}', [ChiTietHoaDonController::class, 'update']);
     // Discount Routes
     use App\Http\Controllers\DiscountController;
     Route::get('magiamgia', [DiscountController::class, 'getAll']); 

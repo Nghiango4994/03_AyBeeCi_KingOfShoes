@@ -10,4 +10,8 @@ class ChiTietHoaDon extends Model
     public $timestamps = false;
     protected $table = 'chi_tiet_hoa_don';
     protected $fillable = ["CTHD_Id",'HoaDon_Id', 'BienThe_Id', 'SoLuong',];
+     public function bienthesanpham()
+    {
+        return $this->hasMany(BienTheSanPham::class, 'id','BienThe_Id');
+    }
 }
