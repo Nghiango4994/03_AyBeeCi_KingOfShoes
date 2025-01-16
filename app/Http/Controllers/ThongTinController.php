@@ -149,17 +149,23 @@ public function ChangePassWord($id, Request $request) {
         ]);
     }
 
-    public function update(Request $request, $id)
-    {
-        $thongTin = ThongTin::find($id);
-        if (!$thongTin) {
-            return response()->json(['message' => 'Not Found'], 404);
-        }
+public function update(Request $request, $id)
+{
+    $thongTin = ThongTin::find($id);
 
-        $thongTin->update($request->all());
-
-        return response()->json($thongTin);
+    if (!$thongTin) {
+        return response()->json(['message' => 'Not Found'], 404);
     }
+
+    // Chỉ lấy dữ liệu từ các trường cần cập nhật
+    $data = $request->only(['ten', 'email', 'sdt','dia_chi','anh_user']);
+
+    // Cập nhật thông tin
+    $thongTin->update($data);
+
+    return response()->json($thongTin);
+}
+
 
     public function destroy($id)
     {
