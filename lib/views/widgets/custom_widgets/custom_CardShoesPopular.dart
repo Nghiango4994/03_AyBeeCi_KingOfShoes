@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class CustomCardshoespopular extends StatefulWidget {
   final String imageUrl;
@@ -40,7 +41,7 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
             child: Image.network(
               widget.imageUrl,
               width: double.infinity,
-              height: 150.0,
+              height: 100.0,
               fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) {
@@ -64,10 +65,6 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "BEST SELLER",
-                  style: TextStyle(color: Colors.blue),
-                ),
                 Text(
                   widget.name,
                   style: const TextStyle(
@@ -81,7 +78,7 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
                       .spaceBetween, // Căn chỉnh các phần tử trong Row
                   children: [
                     Text(
-                      '\$${widget.price}',
+                      '${widget.price} VNĐ',
                       style: const TextStyle(
                         fontSize: 14.0,
                         color: Colors.grey,
@@ -113,4 +110,9 @@ class _CustomCardshoesState extends State<CustomCardshoespopular> {
       ),
     );
   }
+}
+
+String formatCurrency(String price) {
+  final number = int.tryParse(price) ?? 0;
+  return NumberFormat("#,###", "vi_VN").format(number);
 }

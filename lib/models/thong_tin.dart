@@ -1,4 +1,3 @@
-// lib/models/thong_tin.dart
 class ThongTin {
   int id;
   String? ten;
@@ -44,13 +43,12 @@ class ThongTin {
       'id': id,
       'ten': ten,
       'email': email,
-      'ngay_sinh':
-          ngaySinh?.toIso8601String(), // Chuyển đổi DateTime sang String
+      'ngay_sinh': ngaySinh?.toIso8601String(),
       'dia_chi': diaChi,
       'sdt': sdt,
       'mat_khau': matKhau,
-      'locked': locked ? 1 : 0, // Chuyển đổi từ bool sang TINYINT(1)
-      'isAdmin': isAdmin ? 1 : 0, // Chuyển đổi từ bool sang TINYINT(1)
+      'locked': locked ? 1 : 0,
+      'isAdmin': isAdmin ? 1 : 0,
     };
   }
 }
