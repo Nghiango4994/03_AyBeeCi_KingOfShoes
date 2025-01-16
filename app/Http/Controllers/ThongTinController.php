@@ -76,6 +76,26 @@ public function register(Request $request)
         'token' => $token,
     ], 201); // Trả về mã trạng thái 201 cho việc tạo mới thành công
 }
+public function ChangePassWord($id, Request $request) {
+    $user = ThongTin::find($id);
+    \Log::info('User found:', ['user' => $user]);
+    if (!$user) {
+        return response()->json(['message' => 'Not Found'], 404);
+    }
+
+    // Kiểm tra mật khẩu hiện tại
+    if (!$user || !Hash::check($request->mat_khau, $user->mat_khau)) {
+        return response()->json(['message' => 'Mật khẩu hiện tại không đúng'], 400);
+    }
+
+    // Cập nhật mật khẩu mới
+    $user->update([
+        'mat_khau' => bcrypt($request->mat_khau_moi) // Mã hóa mật khẩu mới
+    ]);
+
+    return response()->json($user); // Trả về thông tin người dùng sau khi cập nhật
+}
+
 
     public function index()
     {
@@ -151,16 +171,5 @@ public function register(Request $request)
             return response()->json(['message' => 'Not Found'], 404);
         }
     }
-    
-    public function ChangePassWord($id, Request $request){
-    $user = ThongTin::find($id);
-    if (!$user) {
-        return response()->json(['message' => 'Not Found'], 404);
-    }
-    $user->update([
-        'mat_khau' => bcrypt($request->mat_khau) // Mã hóa mật khẩu
-    ]);
-    return response()->json($user); // Trả về thông tin người dùng sau khi cập nhật 
-}
 }
 
