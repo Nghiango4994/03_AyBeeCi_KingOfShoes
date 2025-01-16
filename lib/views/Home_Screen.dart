@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:kingofshoes/models/bien_the_san_pham.dart';
 import 'package:kingofshoes/viewmodels/Home_ViewModel.dart';
 import 'package:kingofshoes/viewmodels/LoginService.dart';
@@ -29,11 +33,32 @@ class _HomeScreenState extends State<Home_Screen> {
   int _selectedIndex = 0;
   String? email;
   String? ten;
-  String? anh;
+  String? _base64Avatar;
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  final ImagePicker _picker = ImagePicker(); // Image Picker instance
+
+  // Chọn ảnh từ bộ nhớ
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final bytes = await File(pickedFile.path).readAsBytes();
+      setState(() {
+        _base64Avatar = base64Encode(bytes); // Chuyển đổi sang Base64
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã chọn ảnh đại diện!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Chưa chọn ảnh!')),
+      );
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -42,7 +67,7 @@ class _HomeScreenState extends State<Home_Screen> {
       setState(() {
         email = userData['email'].toString();
         ten = userData['ten'].toString();
-        anh = userData['anh_user'].toString();
+        _base64Avatar = userData['anh_user'].toString();
         print("email là : $email");
       });
     } else {
@@ -93,8 +118,14 @@ class _HomeScreenState extends State<Home_Screen> {
               accountName: Text('${ten == null ? '' : ten}'),
               accountEmail: Text('${email == null ? '' : email}'),
               currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(
-                    '${anh == null ? 'https://w7.pngwing.com/pngs/527/663/png-transparent-logo-person-user-person-icon-rectangle-photography-computer-wallpaper.png' : anh}'),
+                radius: 50,
+                backgroundImage: _base64Avatar != null
+                    ? MemoryImage(
+                        base64Decode(_base64Avatar!)) // Hiển thị ảnh từ Base64
+                    : null,
+                child: _base64Avatar == null
+                    ? Icon(Icons.camera_alt, size: 50)
+                    : null,
               ),
               decoration: BoxDecoration(
                 color: Colors.black,

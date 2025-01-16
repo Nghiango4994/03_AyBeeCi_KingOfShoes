@@ -153,9 +153,10 @@ class _RecoveryPassword_ScreenState extends State<RecoveryPassword_Screen> {
               child: CustomTextformfield(
                 isPassword: true,
                 labelText: "Mật khẩu cũ",
-                hintText: "********",
+                hintText: "Mật khẩu cũ",
                 controller: oldPasswordController,
                 suffixIcon: null,
+                isEditing: true,
               ),
             ),
             Container(
@@ -163,9 +164,10 @@ class _RecoveryPassword_ScreenState extends State<RecoveryPassword_Screen> {
               child: CustomTextformfield(
                 isPassword: true,
                 labelText: "Mật khẩu mới",
-                hintText: "********",
+                hintText: "Mật khẩu mới",
                 controller: newPasswordController,
                 suffixIcon: null,
+                isEditing: true,
               ),
             ),
             Container(
@@ -173,9 +175,10 @@ class _RecoveryPassword_ScreenState extends State<RecoveryPassword_Screen> {
               child: CustomTextformfield(
                 isPassword: true,
                 labelText: "Nhập lại mật khẩu",
-                hintText: "********",
+                hintText: "Nhập lại mật khẩu",
                 controller: confirmPasswordController,
                 suffixIcon: null,
+                isEditing: true,
               ),
             ),
             SizedBox(height: 20),

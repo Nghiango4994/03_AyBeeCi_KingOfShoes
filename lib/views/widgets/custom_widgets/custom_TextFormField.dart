@@ -7,6 +7,7 @@ class CustomTextformfield extends StatefulWidget {
   final Widget? suffixIcon;
   final TextEditingController? controller;
   final bool isPassword; // Thêm thuộc tính này để xác định ô nhập mật khẩu
+  final bool isEditing;
   const CustomTextformfield({
     super.key,
     required this.labelText,
@@ -14,6 +15,7 @@ class CustomTextformfield extends StatefulWidget {
     required this.suffixIcon,
     required this.controller,
     required this.isPassword, // Mặc định là false
+    required this.isEditing,
   });
 
   @override
@@ -42,6 +44,7 @@ class _CustomTextformfieldState extends State<CustomTextformfield> {
             },
             obscureText: widget.isPassword ? _isObscured : false,
             controller: widget.controller,
+            enabled: widget.isEditing,
             decoration: InputDecoration(
               hintText: widget.hintText,
               hintStyle:

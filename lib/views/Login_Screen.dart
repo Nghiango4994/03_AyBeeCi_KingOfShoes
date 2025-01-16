@@ -53,6 +53,7 @@ class _LoginState extends State<Login_Screen> {
                   hintText: "Email Address",
                   suffixIcon: null,
                   isPassword: false,
+                  isEditing: true,
                 ),
               ),
               const SizedBox(
@@ -67,6 +68,7 @@ class _LoginState extends State<Login_Screen> {
                   suffixIcon: const Icon(Icons.visibility_off,
                       color: ColorSelectorLightMode.MauChuNoiDung),
                   isPassword: true,
+                  isEditing: true,
                 ),
               ),
               const SizedBox(

@@ -8,7 +8,6 @@ import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/ProfileScreen.dart';
 import 'package:kingofshoes/views/QuanLyDatHang_Screen.dart';
 import 'package:provider/provider.dart';
-
 import 'views/ChiTietHoaDon_Screens.dart';
 
 void main() {
@@ -29,7 +28,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ChiTietDatHangScreen(),
+      home: Home_Screen(),
     );
   }
 }

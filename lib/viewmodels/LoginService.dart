@@ -55,9 +55,7 @@ class LoginService {
       }
 
       // Lưu thông tin người dùng và token vào local
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user', jsonEncode(data['user']));
-      await prefs.setString('token', data['token']);
+      await saveUserData(data['user']);
 
       return data;
     } else {
@@ -92,6 +90,11 @@ class LoginService {
       return jsonDecode(userJson);
     }
     return null; // Trả về null nếu không có dữ liệu
+  }
+
+  static Future<void> saveUserData(Map<String, dynamic> user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user', jsonEncode(user));
   }
 
   // Hàm xóa dữ liệu người dùng và token
