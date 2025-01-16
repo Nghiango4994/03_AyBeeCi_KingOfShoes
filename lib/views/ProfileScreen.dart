@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:kingofshoes/models/thong_tin.dart';
 import 'package:kingofshoes/viewmodels/LoginService.dart';
+import 'package:kingofshoes/viewmodels/Profile_ViewModel.dart';
 import 'package:kingofshoes/views/Home_Screen.dart';
 import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/RecoveryPW_Screen.dart';
@@ -10,8 +12,6 @@ import 'package:kingofshoes/views/widgets/Provider.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -19,16 +19,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final ProfileViewModel _viewModel = ProfileViewModel();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _Default = TextEditingController();
 
   bool _isLoading = true;
+  bool _isEditing = false; // Biến để theo dõi trạng thái chỉnh sửa
   File? _imageFile;
   String? _imageUrl;
   String? anh;
+  int? id_user;
   @override
   void initState() {
     super.initState();
@@ -36,26 +38,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    _Default.text = "Bạn chưa nhập thông tin";
     final user = await LoginService.getUserData();
-    _Default.text = _Default.text;
     if (user != null) {
       setState(() {
-        _nameController.text =
-            user['ten'] == null ? _Default.text : user['ten'].toString();
-        _emailController.text =
-            user['email'] == null ? _Default.text : user['email'].toString();
-        _phoneController.text =
-            user['sdt'] == null ? _Default.text : user['sdt'].toString();
-        _addressController.text = user['dia_chi'] == null
-            ? _Default.text
-            : user['dia_chi'].toString();
-        anh = user['anh_user'] == null
-            ? _Default.text
-            : user['anh_user'].toString();
+        id_user = int.parse(user['id'].toString());
+        _nameController.text = user['ten'] ?? "Bạn chưa nhập thông tin";
+        _emailController.text = user['email'] ?? "Bạn chưa nhập thông tin";
+        _phoneController.text = user['sdt'] ?? "Bạn chưa nhập thông tin";
+        _addressController.text =
+            user['dia_chi'] ?? "Bạn chưa nhập thông tin";
+        anh = user['anh_user'] ?? "Bạn chưa nhập thông tin";
       });
     } else {
-      // Hiển thị dialog thông báo
       _showLoginDialog();
     }
   }
@@ -71,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               child: const Text('Đăng nhập'),
               onPressed: () {
-                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => Login_Screen()),
                 );
@@ -80,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               child: const Text('Hủy'),
               onPressed: () {
-                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => Home_Screen()),
                 );
@@ -92,24 +86,57 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _updateUserData() async {
+    final updatedUser = ThongTin(
+      id: _viewModel.user!.id,
+      ten: _nameController.text,
+      email: _emailController.text,
+      sdt: _phoneController.text,
+      diaChi: _addressController.text,
+    );
+    print(updatedUser);
+    try {
+      await _viewModel.updateUserData(updatedUser);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Cập nhật thành công!')));
+    } catch (e) {
+      _showErrorDialog('Cập nhật thất bại.');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Lỗi'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   final ImagePicker _picker = ImagePicker();
 
-  // Chọn ảnh từ thư viện hoặc camera
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
-        _imageUrl = null; // Reset _imageUrl khi chọn ảnh mới
+        _imageUrl = null;
       });
-
-      // Lưu ảnh vào bộ nhớ trong thiết bị
       await _saveImageToStorage(pickedFile);
     }
   }
 
-  // Lưu ảnh vào bộ nhớ trong của thiết bị
   Future<void> _saveImageToStorage(XFile pickedFile) async {
     final directory = await getApplicationDocumentsDirectory();
     final imagePath = '${directory.path}/${path.basename(pickedFile.path)}';
@@ -140,11 +167,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           IconButton(
             icon: Icon(
-              Icons.edit,
+              _isEditing == true ? Icons.check : Icons.edit,
               color: Colors.blue,
             ),
             onPressed: () {
-              // Hàm sửa hồ sơ sau này
+              setState(() {
+                // if (_isEditing == true) {
+                _updateUserData();
+                // } // Chuyển đổi trạng thái chỉnh sửa
+                _isEditing = !_isEditing;
+              });
             },
           ),
         ],
@@ -192,9 +224,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CustomTextformfield(
                 labelText: "Họ và Tên",
                 hintText: "Tên của bạn",
-                textEditingController:
-                    _nameController == null ? _Default : _nameController,
+                textEditingController: _nameController,
                 suffixIcon: const Icon(Icons.person),
+                isEditing: _isEditing, // Truyền biến _isEditing
               ),
             ),
             SizedBox(height: 20),
@@ -203,9 +235,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CustomTextformfield(
                 labelText: "Email",
                 hintText: "Email của bạn",
-                textEditingController:
-                    _emailController == null ? _Default : _emailController,
+                textEditingController: _emailController,
                 suffixIcon: const Icon(Icons.email),
+                isEditing: _isEditing, // Truyền biến _isEditing
               ),
             ),
             SizedBox(height: 20),
@@ -214,9 +246,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CustomTextformfield(
                 labelText: "Số điện thoại",
                 hintText: "Số điện thoại của bạn",
-                textEditingController:
-                    _phoneController == null ? _Default : _phoneController,
+                textEditingController: _phoneController,
                 suffixIcon: const Icon(Icons.phone),
+                isEditing: _isEditing, // Truyền biến _isEditing
               ),
             ),
             SizedBox(height: 20),
@@ -225,24 +257,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: CustomTextformfield(
                 labelText: "Địa chỉ",
                 hintText: "Địa chỉ của bạn",
-                textEditingController:
-                    _addressController == null ? _Default : _addressController,
+                textEditingController: _addressController,
                 suffixIcon: const Icon(Icons.location_on),
+                isEditing: _isEditing, // Truyền biến _isEditing
               ),
             ),
             SizedBox(height: 40),
 
             // Nút Đổi mật khẩu
             Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                child: CustomButton(
-                    text: "Đổi Mật Khẩu",
-                    onClick: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RecoveryPassword_Screen()));
-                    })),
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: CustomButton(
+                text: "Đổi Mật Khẩu",
+                onClick: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RecoveryPassword_Screen(),
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -255,6 +291,7 @@ class CustomTextformfield extends StatelessWidget {
   final String hintText;
   final Widget? suffixIcon;
   final TextEditingController textEditingController;
+  final bool isEditing; // Thêm tham số isEditing
 
   const CustomTextformfield({
     super.key,
@@ -262,6 +299,7 @@ class CustomTextformfield extends StatelessWidget {
     required this.hintText,
     required this.suffixIcon,
     required this.textEditingController,
+    required this.isEditing, // Nhận tham số isEditing
   });
 
   @override
@@ -280,7 +318,7 @@ class CustomTextformfield extends StatelessWidget {
           ),
           TextFormField(
             controller: textEditingController,
-            enabled: false,
+            enabled: isEditing, // Sử dụng biến isEditing
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: TextStyle(color: Colors.black),

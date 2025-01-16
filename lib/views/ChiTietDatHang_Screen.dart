@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
 
-class InvoiceDetailScreen extends StatelessWidget {
+class ChiTietDatHangScreen extends StatefulWidget {
+  @override
+  State<ChiTietDatHangScreen> createState() => _ChiTietDatHangScreenState();
+}
+
+class _ChiTietDatHangScreenState extends State<ChiTietDatHangScreen> {
   @override
   Widget build(BuildContext context) {
     final numberFormat = NumberFormat('#,##0');
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: const Text(
-          "Chi tiết hóa đơn",
+          "Chi Tiết Đặt Hàng",
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -22,7 +26,7 @@ class InvoiceDetailScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            CustomButton(text: "Duyệt", onClick: () {}),
+            CustomButton(text: "Yêu cầu trả hàng", onClick: () {}),
           ],
         ),
       ),
@@ -49,8 +53,6 @@ class InvoiceDetailScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Hóa đơn ID: HD12345",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         const Text("Tên khách hàng: Nguyễn Văn A",
             style: TextStyle(fontSize: 16)),
@@ -59,7 +61,7 @@ class InvoiceDetailScreen extends StatelessWidget {
         const SizedBox(height: 8),
         const Text("Trạng thái: Đã thanh toán", style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
-        const Text("Hình thức thanh toán: Thẻ tín dụng",
+        const Text("Hình thức thanh toán: MoMo",
             style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
         const Text("Mã giảm  giá: 10,000 VND",
