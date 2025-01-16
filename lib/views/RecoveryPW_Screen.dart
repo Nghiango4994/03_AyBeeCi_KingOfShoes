@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/viewmodels/ChangePasswordViewmodel.dart';
-
 import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/widgets/color_selector.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_TextFormField.dart';
@@ -49,8 +48,8 @@ class _RecoveryPassword_ScreenState extends State<RecoveryPassword_Screen> {
   Future<void> handleChangePassword() async {
     if (newPasswordController.text == confirmPasswordController.text) {
       try {
-        await ChangePasswordViewmodel().changePassword(
-            (idKhachHang.toString()), newPasswordController.text);
+        await ChangePasswordViewmodel().changePassword((idKhachHang.toString()),
+            oldPasswordController.text, newPasswordController.text);
 
         // Hiển thị dialog thông báo thành công
         showDialog(
@@ -72,6 +71,22 @@ class _RecoveryPassword_ScreenState extends State<RecoveryPassword_Screen> {
           ),
         );
       } catch (e) {
+        //Hiển thị khi mật khẩu cũ không đúng
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Lỗi'),
+            content: Text('Mật khẩu cũ không đúng'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
         // Hiển thị dialog thông báo lỗi
         showDialog(
           context: context,
