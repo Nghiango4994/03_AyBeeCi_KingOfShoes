@@ -1,3 +1,3 @@
 class Providers {
-  static const String Url = "http://192.168.0.102:8000/api";
+  static const String Url = "http://127.0.0.1:8000/api";
 }
