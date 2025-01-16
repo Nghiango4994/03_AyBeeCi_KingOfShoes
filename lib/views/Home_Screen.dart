@@ -1,13 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:kingofshoes/models/bien_the_san_pham.dart';
 import 'package:kingofshoes/viewmodels/Home_ViewModel.dart';
 import 'package:kingofshoes/viewmodels/LoginService.dart';
 import 'package:kingofshoes/views/Cart_Screen.dart';
-import 'package:kingofshoes/views/CheckOutScreens.dart';
 import 'package:kingofshoes/views/Detail_Screen.dart';
 import 'package:kingofshoes/views/Favourite_Screen.dart';
 import 'package:kingofshoes/views/Login_Screen.dart';
@@ -28,75 +25,22 @@ class Home_Screen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<Home_Screen> {
+  final HomeViewModel viewModel = HomeViewModel();
   final ValueNotifier<int> selectedIndex = ValueNotifier<int>(-1);
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _searchController = TextEditingController();
   int _selectedIndex = 0;
-  String? email;
-  String? ten;
-<<<<<<< HEAD
-  String? _base64Avatar;
-=======
-  String? anh;
 
-  List<BienTheSanPham> _allProducts = [];
-  final ValueNotifier<List<BienTheSanPham>> filteredProductsNotifier =
-      ValueNotifier<List<BienTheSanPham>>([]);
-
->>>>>>> fd79e8b129ba2429251a8be87733ebc71b10b342
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  final ImagePicker _picker = ImagePicker(); // Image Picker instance
-
-  // Chọn ảnh từ bộ nhớ
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      final bytes = await File(pickedFile.path).readAsBytes();
-      setState(() {
-        _base64Avatar = base64Encode(bytes); // Chuyển đổi sang Base64
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Đã chọn ảnh đại diện!')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Chưa chọn ảnh!')),
-      );
-    }
-  }
-
-  Future<void> _loadUserData() async {
-    final userData = await LoginService.getUserData();
-    if (userData != null) {
-      setState(() {
-        email = userData['email'].toString();
-        ten = userData['ten'].toString();
-<<<<<<< HEAD
-        _base64Avatar = userData['anh_user'].toString();
-        print("email là : $email");
-=======
-        anh = userData['anh_user'].toString();
-        print("email là : $email");
->>>>>>> fd79e8b129ba2429251a8be87733ebc71b10b342
-      });
-    } else {
-      // Hiển thị dialog thông báo
-    }
-  }
-
-  void _filterProducts(String query) {
-    final filteredProducts = _allProducts
-        .where((product) =>
-            product.ten_bien_the.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    filteredProductsNotifier.value =
-        filteredProducts; // Cập nhật giá trị của ValueNotifier
+  @override
+  void initState() {
+    super.initState();
+    viewModel.loadUserData(); // Tải dữ liệu người dùng khi khởi tạo
   }
 
   @override
@@ -117,7 +61,7 @@ class _HomeScreenState extends State<Home_Screen> {
           child: IconButton(
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
-              _loadUserData();
+              viewModel.loadUserData();
             },
             icon: const Icon(Icons.menu),
           ),
@@ -139,22 +83,17 @@ class _HomeScreenState extends State<Home_Screen> {
         child: Column(
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text('${ten ?? ''}'),
-              accountEmail: Text('${email ?? ''}'),
+              accountName: Text('${viewModel.ten ?? ''}'),
+              accountEmail: Text('${viewModel.email ?? ''}'),
               currentAccountPicture: CircleAvatar(
-<<<<<<< HEAD
                 radius: 50,
-                backgroundImage: _base64Avatar != null
+                backgroundImage: viewModel.anh != null
                     ? MemoryImage(
-                        base64Decode(_base64Avatar!)) // Hiển thị ảnh từ Base64
+                        base64Decode(viewModel.anh!)) // Hiển thị ảnh từ Base64
                     : null,
-                child: _base64Avatar == null
+                child: viewModel.anh == null
                     ? Icon(Icons.camera_alt, size: 50)
                     : null,
-=======
-                backgroundImage: NetworkImage(
-                    '${anh ?? 'https://w7.pngwing.com/pngs/527/663/png-transparent-logo-person-user-person-icon-rectangle-photography-computer-wallpaper.png'}'),
->>>>>>> fd79e8b129ba2429251a8be87733ebc71b10b342
               ),
               decoration: BoxDecoration(
                 color: Colors.black,
@@ -205,10 +144,10 @@ class _HomeScreenState extends State<Home_Screen> {
             ),
             const Divider(),
             ListTile(
-              leading: Icon(ten == null ? Icons.login : Icons.logout),
-              title: Text(ten == null ? 'Đăng Nhập' : 'Đăng Xuất'),
+              leading: Icon(viewModel.ten == null ? Icons.login : Icons.logout),
+              title: Text(viewModel.ten == null ? 'Đăng Nhập' : 'Đăng Xuất'),
               onTap: () async {
-                if (ten != null) {
+                if (viewModel.ten != null) {
                   await LoginService.clearUserData();
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => Home_Screen()));
@@ -233,9 +172,8 @@ class _HomeScreenState extends State<Home_Screen> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No products available.'));
           } else {
-            _allProducts = snapshot.data!; // Lưu danh sách sản phẩm gốc
-            filteredProductsNotifier.value =
-                _allProducts; // Khởi tạo danh sách sản phẩm đã lọc
+            viewModel
+                .updateProducts(snapshot.data!); // Cập nhật danh sách sản phẩm
 
             return SingleChildScrollView(
               child: Column(
@@ -244,7 +182,8 @@ class _HomeScreenState extends State<Home_Screen> {
                   CustomSearch(
                     hintText: "Tìm kiếm sản phẩm",
                     controller: _searchController,
-                    onChanged: _filterProducts, // Sử dụng hàm lọc
+                    onChanged: viewModel
+                        .filterProducts, // Sử dụng hàm lọc từ ViewModel
                   ),
                   const SizedBox(height: 20),
                   Center(
@@ -316,7 +255,7 @@ class _HomeScreenState extends State<Home_Screen> {
                     ),
                   ),
                   ValueListenableBuilder<List<BienTheSanPham>>(
-                    valueListenable: filteredProductsNotifier,
+                    valueListenable: viewModel.filteredProductsNotifier,
                     builder: (context, filteredProducts, child) {
                       return ScrollConfiguration(
                         behavior: Scroll(),
@@ -361,7 +300,7 @@ class _HomeScreenState extends State<Home_Screen> {
                   ),
                   // Phần này có thể tương tự như phần "Phổ Biến" nếu cần
                   ValueListenableBuilder<List<BienTheSanPham>>(
-                    valueListenable: filteredProductsNotifier,
+                    valueListenable: viewModel.filteredProductsNotifier,
                     builder: (context, filteredProducts, child) {
                       return ScrollConfiguration(
                         behavior: Scroll(),

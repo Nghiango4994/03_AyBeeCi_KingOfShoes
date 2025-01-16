@@ -8,10 +8,8 @@ import 'package:kingofshoes/viewmodels/LoginService.dart';
 import 'package:kingofshoes/viewmodels/Profile_ViewModel.dart';
 import 'package:kingofshoes/views/Home_Screen.dart';
 import 'package:kingofshoes/views/Login_Screen.dart';
-import 'package:kingofshoes/views/widgets/Provider.dart';
+import 'package:kingofshoes/views/RecoveryPW_Screen.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -159,7 +157,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chỉnh sửa thông tin cá nhân'),
+        title: const Text(
+          'Thông Tin',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(_isEditing ? Icons.save : Icons.edit),
@@ -228,6 +230,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 isEditing: _isEditing,
                 suffixIcon: null,
               ),
+              const SizedBox(height: 16),
+              CustomButton(
+                  text: "Đổi mật khẩu",
+                  onClick: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RecoveryPassword_Screen()));
+                  })
             ],
           ),
         ),
