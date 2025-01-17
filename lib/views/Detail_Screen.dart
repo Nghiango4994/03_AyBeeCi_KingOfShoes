@@ -117,7 +117,7 @@ class _Detail_ScreenState extends State<Detail_Screen> {
                                 ),
                               ),
                               Text(
-                                'Price: \$${product.gia_ban}',
+                                'Giá: \$${product.gia_ban}',
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,

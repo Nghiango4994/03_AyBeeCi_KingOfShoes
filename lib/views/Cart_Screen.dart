@@ -179,36 +179,36 @@ class _CartScreenState extends State<CartScreen> {
                   const SizedBox(height: 4.0),
                   Text(
                       '${formatCurrency(item.bienTheSanPham.first.gia_ban)} VNĐ'),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () async {
+                          await viewModel.decreaseQuantity(
+                              item.idGioHang, item.id_bien_the);
+                          viewModel.fetchCartItems(id);
+                        },
+                        icon: const Icon(Icons.remove),
+                      ),
+                      Text('${item.soluong}'),
+                      IconButton(
+                        onPressed: () async {
+                          await viewModel.increaseQuantity(
+                              item.idGioHang, item.id_bien_the);
+                          viewModel.fetchCartItems(id);
+                        },
+                        icon: const Icon(Icons.add),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          await viewModel.deleteItem(item.idGioHang);
+                          viewModel.fetchCartItems(id);
+                        },
+                        icon: const Icon(Icons.delete, color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-            ),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () async {
-                    await viewModel.decreaseQuantity(
-                        item.idGioHang, item.id_bien_the);
-                    viewModel.fetchCartItems(id);
-                  },
-                  icon: const Icon(Icons.remove),
-                ),
-                Text('${item.soluong}'),
-                IconButton(
-                  onPressed: () async {
-                    await viewModel.increaseQuantity(
-                        item.idGioHang, item.id_bien_the);
-                    viewModel.fetchCartItems(id);
-                  },
-                  icon: const Icon(Icons.add),
-                ),
-                IconButton(
-                  onPressed: () async {
-                    await viewModel.deleteItem(item.idGioHang);
-                    viewModel.fetchCartItems(id);
-                  },
-                  icon: const Icon(Icons.delete, color: Colors.grey),
-                ),
-              ],
             ),
           ],
         ),

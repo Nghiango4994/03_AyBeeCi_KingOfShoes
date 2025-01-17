@@ -84,4 +84,29 @@ class HoaDonViewModel extends ChangeNotifier {
         return "Không xác định";
     }
   }
+
+  Color getTrangThaiColor(int? status) {
+    switch (status) {
+      case 1: // Chờ duyệt
+        return Colors.orange;
+      case 2: // Đang chuẩn bị hàng
+        return Colors.blue;
+      case 3: // Đang giao hàng
+        return Colors.green;
+      case 4: // Đã nhận hàng
+        return Colors.green.shade700;
+      case 5: // Đã hủy
+        return Colors.red;
+      case 6: // Đã trả
+        return Colors.purple;
+      case 7: // Yêu cầu trả
+        return Colors.pink;
+      case 8: // Đang chờ đơn vị vận chuyển
+        return Colors.yellow;
+      case 9: // Đã hoàn tất
+        return Colors.grey;
+      default:
+        return Colors.grey;
+    }
+  }
 }

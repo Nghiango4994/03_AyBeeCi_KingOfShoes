@@ -1,14 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/models/bien_the_san_pham.dart';
 import 'package:kingofshoes/viewmodels/Home_ViewModel.dart';
 import 'package:kingofshoes/viewmodels/LoginService.dart';
 import 'package:kingofshoes/views/Cart_Screen.dart';
-import 'package:kingofshoes/views/CheckOutScreens.dart';
 import 'package:kingofshoes/views/Detail_Screen.dart';
 import 'package:kingofshoes/views/Favourite_Screen.dart';
 import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/Notification_Screen.dart';
 import 'package:kingofshoes/views/ProfileScreen.dart';
+import 'package:kingofshoes/views/QuanLyDatHang_Screen.dart';
 import 'package:kingofshoes/views/SeeAll_Screen.dart';
 import 'package:kingofshoes/views/widgets/color_selector.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_ButtonBrand.dart';
@@ -24,30 +26,22 @@ class Home_Screen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<Home_Screen> {
+  final HomeViewModel viewModel = HomeViewModel();
   final ValueNotifier<int> selectedIndex = ValueNotifier<int>(-1);
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final TextEditingController _searchController = TextEditingController();
   int _selectedIndex = 0;
-  String? email;
-  String? ten;
-  String? anh;
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  Future<void> _loadUserData() async {
-    final userData = await LoginService.getUserData();
-    if (userData != null) {
-      setState(() {
-        email = userData['email'].toString();
-        ten = userData['ten'].toString();
-        anh = userData['anh_user'].toString();
-        print("email là : $email");
-      });
-    } else {
-      // Hiển thị dialog thông báo
-    }
+  @override
+  void initState() {
+    super.initState();
+    viewModel.loadUserData(); // Tải dữ liệu người dùng khi khởi tạo
   }
 
   @override
@@ -56,7 +50,7 @@ class _HomeScreenState extends State<Home_Screen> {
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text(
-          "Trang Chủ",
+          "Trang Chủ",
           style: TextStyle(
               color: ColorSelectorLightMode.MauChuNoiDung,
               fontSize: 20,
@@ -66,9 +60,9 @@ class _HomeScreenState extends State<Home_Screen> {
         leading: Padding(
           padding: const EdgeInsets.all(5),
           child: IconButton(
-            onPressed: () {
+            onPressed: () async {
+              await viewModel.loadUserData();
               _scaffoldKey.currentState?.openDrawer();
-              _loadUserData();
             },
             icon: const Icon(Icons.menu),
           ),
@@ -90,11 +84,17 @@ class _HomeScreenState extends State<Home_Screen> {
         child: Column(
           children: [
             UserAccountsDrawerHeader(
-              accountName: Text('${ten == null ? '' : ten}'),
-              accountEmail: Text('${email == null ? '' : email}'),
+              accountName: Text('${viewModel.ten ?? ''}'),
+              accountEmail: Text('${viewModel.email ?? ''}'),
               currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage(
-                    '${anh == null ? 'https://w7.pngwing.com/pngs/527/663/png-transparent-logo-person-user-person-icon-rectangle-photography-computer-wallpaper.png' : anh}'),
+                radius: 50,
+                backgroundImage: viewModel.anh != null
+                    ? MemoryImage(
+                        base64Decode(viewModel.anh!)) // Hiển thị ảnh từ Base64
+                    : null,
+                child: viewModel.anh == null
+                    ? Icon(Icons.camera_alt, size: 50)
+                    : null,
               ),
               decoration: BoxDecoration(
                 color: Colors.black,
@@ -104,10 +104,21 @@ class _HomeScreenState extends State<Home_Screen> {
               leading: const Icon(Icons.home),
               title: const Text('Trang Chủ'),
               onTap: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                         builder: (context) => const Home_Screen()));
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.receipt_long),
+              title: const Text('Hóa Đơn'),
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => QuanLyDatHangScreen()));
               },
             ),
             const Divider(),
@@ -134,12 +145,6 @@ class _HomeScreenState extends State<Home_Screen> {
             ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.list),
-              title: const Text('Hóa Đơn'),
-              onTap: () {},
-            ),
-            const Divider(),
-            ListTile(
               leading: const Icon(Icons.notifications),
               title: const Text('Thông Báo'),
               onTap: () {
@@ -151,10 +156,10 @@ class _HomeScreenState extends State<Home_Screen> {
             ),
             const Divider(),
             ListTile(
-              leading: Icon(ten == null ? Icons.login : Icons.logout),
-              title: Text(ten == null ? 'Đăng Nhập' : 'Đăng Xuất'),
+              leading: Icon(viewModel.ten == null ? Icons.login : Icons.logout),
+              title: Text(viewModel.ten == null ? 'Đăng Nhập' : 'Đăng Xuất'),
               onTap: () async {
-                if (ten != null) {
+                if (viewModel.ten != null) {
                   await LoginService.clearUserData();
                   Navigator.pushReplacement(context,
                       MaterialPageRoute(builder: (context) => Home_Screen()));
@@ -179,21 +184,20 @@ class _HomeScreenState extends State<Home_Screen> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No products available.'));
           } else {
-            final products = snapshot.data!;
+            viewModel
+                .updateProducts(snapshot.data!); // Cập nhật danh sách sản phẩm
 
             return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Center(
-                    child: SizedBox(
-                      width: 400,
-                      child: CustomSearch(hintText: "Tìm kiếm"),
-                    ),
+                  CustomSearch(
+                    hintText: "Tìm kiếm sản phẩm",
+                    controller: _searchController,
+                    onChanged: viewModel
+                        .filterProducts, // Sử dụng hàm lọc từ ViewModel
                   ),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   Center(
                     child: ScrollConfiguration(
                       behavior: Scroll(),
@@ -262,36 +266,41 @@ class _HomeScreenState extends State<Home_Screen> {
                       ],
                     ),
                   ),
-                  ScrollConfiguration(
-                    behavior: Scroll(),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: products.map((product) {
-                          return InkWell(
-                            onTap: () {
-                              print(product.anhSp?.duong_dan_anh ?? '');
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          Detail_Screen(id: "${product.id}")));
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: SizedBox(
-                                width: 200,
-                                child: CustomCardshoespopular(
-                                  imageUrl: product.anhSp?.duong_dan_anh ?? '',
-                                  name: product.ten_bien_the,
-                                  price: product.gia_ban.toString(),
+                  ValueListenableBuilder<List<BienTheSanPham>>(
+                    valueListenable: viewModel.filteredProductsNotifier,
+                    builder: (context, filteredProducts, child) {
+                      return ScrollConfiguration(
+                        behavior: Scroll(),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: filteredProducts.map((product) {
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Detail_Screen(
+                                              id: "${product.id}")));
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: CustomCardshoespopular(
+                                      imageUrl:
+                                          product.anhSp?.duong_dan_anh ?? '',
+                                      name: product.ten_bien_the,
+                                      price: product.gia_ban.toString(),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                   const Padding(
                     padding: EdgeInsets.all(20),
@@ -301,29 +310,36 @@ class _HomeScreenState extends State<Home_Screen> {
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  ScrollConfiguration(
-                    behavior: Scroll(),
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: products.map((product) {
-                          return InkWell(
-                            onTap: () {},
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: SizedBox(
-                                width: 200,
-                                child: CustomCardshoespopular(
-                                  imageUrl: product.anhSp?.duong_dan_anh ?? '',
-                                  name: product.ten_bien_the,
-                                  price: product.gia_ban.toString(),
+                  // Phần này có thể tương tự như phần "Phổ Biến" nếu cần
+                  ValueListenableBuilder<List<BienTheSanPham>>(
+                    valueListenable: viewModel.filteredProductsNotifier,
+                    builder: (context, filteredProducts, child) {
+                      return ScrollConfiguration(
+                        behavior: Scroll(),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: filteredProducts.map((product) {
+                              return InkWell(
+                                onTap: () {},
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: SizedBox(
+                                    width: 200,
+                                    child: CustomCardshoespopular(
+                                      imageUrl:
+                                          product.anhSp?.duong_dan_anh ?? '',
+                                      name: product.ten_bien_the,
+                                      price: product.gia_ban.toString(),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

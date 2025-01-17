@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/viewmodels/QuanLyHoaDon.dart';
-import 'package:kingofshoes/views/CheckOutScreens.dart';
 import 'package:kingofshoes/views/Home_Screen.dart';
-import 'package:kingofshoes/views/Login_Screen.dart';
-import 'package:kingofshoes/views/ProfileScreen.dart';
 import 'package:provider/provider.dart';
 
 void main() {

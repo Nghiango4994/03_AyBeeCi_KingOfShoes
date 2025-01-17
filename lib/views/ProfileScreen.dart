@@ -1,17 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:kingofshoes/models/thong_tin.dart';
 import 'package:kingofshoes/viewmodels/LoginService.dart';
+import 'package:kingofshoes/viewmodels/Profile_ViewModel.dart';
 import 'package:kingofshoes/views/Home_Screen.dart';
 import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/RecoveryPW_Screen.dart';
-import 'package:kingofshoes/views/widgets/Provider.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as path;
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -19,16 +17,15 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _Default = TextEditingController();
+  final _viewModel = ProfileViewModel();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  bool _isEditing = false;
+  int id_user = 1; // Example user ID
+  String? _base64Avatar; // Lưu chuỗi Base64 của ảnh đại diện
 
-  bool _isLoading = true;
-  File? _imageFile;
-  String? _imageUrl;
-  String? anh;
   @override
   void initState() {
     super.initState();
@@ -36,26 +33,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserData() async {
-    _Default.text = "Bạn chưa nhập thông tin";
     final user = await LoginService.getUserData();
-    _Default.text = _Default.text;
     if (user != null) {
       setState(() {
-        _nameController.text =
-            user['ten'] == null ? _Default.text : user['ten'].toString();
-        _emailController.text =
-            user['email'] == null ? _Default.text : user['email'].toString();
-        _phoneController.text =
-            user['sdt'] == null ? _Default.text : user['sdt'].toString();
-        _addressController.text = user['dia_chi'] == null
-            ? _Default.text
-            : user['dia_chi'].toString();
-        anh = user['anh_user'] == null
-            ? _Default.text
-            : user['anh_user'].toString();
+        id_user = int.parse(user['id'].toString());
+        _nameController.text = user['ten'] ?? "";
+        _emailController.text = user['email'] ?? "";
+        _phoneController.text = user['sdt'] ?? "";
+        _addressController.text = user['dia_chi'] ?? "";
+        _base64Avatar = user['anh_user'] ?? "";
       });
     } else {
-      // Hiển thị dialog thông báo
       _showLoginDialog();
     }
   }
@@ -71,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               child: const Text('Đăng nhập'),
               onPressed: () {
-                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => Login_Screen()),
                 );
@@ -80,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               child: const Text('Hủy'),
               onPressed: () {
-                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pop();
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (context) => Home_Screen()),
                 );
@@ -92,158 +80,173 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  final ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker(); // Image Picker instance
 
-  // Chọn ảnh từ thư viện hoặc camera
+  // Chọn ảnh từ bộ nhớ
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
+      final bytes = await File(pickedFile.path).readAsBytes();
+
+      // Thực hiện nén ảnh
+      img.Image originalImage = img.decodeImage(bytes)!;
+      img.Image resizedImage =
+          img.copyResize(originalImage, width: 600); // Thay đổi kích thước ảnh
+
+      // Chuyển đổi sang Base64
+      final compressedBytes = img.encodeJpg(resizedImage,
+          quality: 80); // Nén ảnh với chất lượng 80%
       setState(() {
-        _imageFile = File(pickedFile.path);
-        _imageUrl = null; // Reset _imageUrl khi chọn ảnh mới
+        _base64Avatar = base64Encode(compressedBytes);
       });
 
-      // Lưu ảnh vào bộ nhớ trong thiết bị
-      await _saveImageToStorage(pickedFile);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đã chọn ảnh đại diện!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Chưa chọn ảnh!')),
+      );
     }
   }
 
-  // Lưu ảnh vào bộ nhớ trong của thiết bị
-  Future<void> _saveImageToStorage(XFile pickedFile) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final imagePath = '${directory.path}/${path.basename(pickedFile.path)}';
-    await File(pickedFile.path).copy(imagePath);
-    print('Image saved to: $imagePath');
+  // Cập nhật dữ liệu người dùng
+  Future<void> _updateUserData() async {
+    final updatedUser = ThongTin(
+      id: id_user,
+      ten: _nameController.text,
+      email: _emailController.text,
+      sdt: _phoneController.text,
+      diaChi: _addressController.text,
+      anh_user: _base64Avatar, // Gửi chuỗi Base64
+    );
+
+    try {
+      await _viewModel.updateUserData(updatedUser);
+      await LoginService.saveUserData(updatedUser.toJson());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cập nhật thành công!')),
+      );
+      setState(() {
+        _isEditing = false; // Kết thúc chế độ chỉnh sửa
+      });
+    } catch (e) {
+      print(e);
+      _showErrorDialog('Cập nhật thất bại');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Lỗi'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.black,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          "Thông tin cá nhân",
-          style: TextStyle(color: Colors.black),
+        title: const Text(
+          'Thông Tin',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.edit,
-              color: Colors.blue,
-            ),
+            icon: Icon(_isEditing ? Icons.save : Icons.edit),
             onPressed: () {
-              // Hàm sửa hồ sơ sau này
+              setState(() {
+                if (_isEditing) {
+                  print(_base64Avatar);
+                  _updateUserData(); // Gọi cập nhật dữ liệu
+                } else {
+                  _isEditing = true; // Bắt đầu chỉnh sửa
+                }
+              });
             },
           ),
         ],
+        leading: IconButton(
+            onPressed: () {
+              _loadUserData();
+              Navigator.pop(context);
+            },
+            icon: Icon(Icons.arrow_back)),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Avatar
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  CircleAvatar(
-                    radius: 65,
-                    backgroundImage: _imageFile != null
-                        ? FileImage(_imageFile!)
-                        : anh != null
-                            ? NetworkImage(anh == null ? "" : anh.toString())
-                            : NetworkImage(
-                                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ48JWGkSOWJegd_jiLj6C5cz-Ityd6OMLR-w&s'),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    child: GestureDetector(
-                      onTap: _pickImage,
-                      child: CircleAvatar(
-                        radius: 15,
-                        backgroundColor: Colors.blue,
-                        child: Icon(
-                          Icons.camera_alt,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _isEditing
+                    ? _pickImage
+                    : null, // Chọn ảnh nếu đang chỉnh sửa
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _base64Avatar != null
+                      ? MemoryImage(base64Decode(
+                          _base64Avatar!)) // Hiển thị ảnh từ Base64
+                      : null,
+                  child: _base64Avatar == null
+                      ? Icon(Icons.camera_alt, size: 50)
+                      : null,
+                ),
               ),
-            ),
-
-            // Các TextFormField
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: CustomTextformfield(
-                labelText: "Họ và Tên",
-                hintText: "Tên của bạn",
-                textEditingController:
-                    _nameController == null ? _Default : _nameController,
-                suffixIcon: const Icon(Icons.person),
+              const SizedBox(height: 16),
+              CustomTextformfield(
+                labelText: 'Họ và Tên',
+                hintText: 'Tên của bạn',
+                textEditingController: _nameController,
+                isEditing: _isEditing,
+                suffixIcon: null,
               ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: CustomTextformfield(
-                labelText: "Email",
-                hintText: "Email của bạn",
-                textEditingController:
-                    _emailController == null ? _Default : _emailController,
-                suffixIcon: const Icon(Icons.email),
+              const SizedBox(height: 16),
+              CustomTextformfield(
+                labelText: 'Email',
+                hintText: 'example@gmail.com',
+                textEditingController: _emailController,
+                isEditing: _isEditing,
+                suffixIcon: null,
               ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: CustomTextformfield(
-                labelText: "Số điện thoại",
-                hintText: "Số điện thoại của bạn",
-                textEditingController:
-                    _phoneController == null ? _Default : _phoneController,
-                suffixIcon: const Icon(Icons.phone),
+              const SizedBox(height: 16),
+              CustomTextformfield(
+                labelText: 'Số điện thoại',
+                hintText: '0123456789',
+                textEditingController: _phoneController,
+                isEditing: _isEditing,
+                suffixIcon: null,
               ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: CustomTextformfield(
-                labelText: "Địa chỉ",
-                hintText: "Địa chỉ của bạn",
-                textEditingController:
-                    _addressController == null ? _Default : _addressController,
-                suffixIcon: const Icon(Icons.location_on),
+              const SizedBox(height: 16),
+              CustomTextformfield(
+                labelText: 'Địa chỉ',
+                hintText: 'Địa chỉ của bạn',
+                textEditingController: _addressController,
+                isEditing: _isEditing,
+                suffixIcon: null,
               ),
-            ),
-            SizedBox(height: 40),
-
-            // Nút Đổi mật khẩu
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30.0),
-                child: CustomButton(
-                    text: "Đổi Mật Khẩu",
-                    onClick: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => RecoveryPassword_Screen()));
-                    })),
-          ],
+              const SizedBox(height: 16),
+              CustomButton(
+                  text: "Đổi mật khẩu",
+                  onClick: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => RecoveryPassword_Screen()));
+                  })
+            ],
+          ),
         ),
       ),
     );
@@ -255,6 +258,7 @@ class CustomTextformfield extends StatelessWidget {
   final String hintText;
   final Widget? suffixIcon;
   final TextEditingController textEditingController;
+  final bool isEditing; // Thêm tham số isEditing
 
   const CustomTextformfield({
     super.key,
@@ -262,6 +266,7 @@ class CustomTextformfield extends StatelessWidget {
     required this.hintText,
     required this.suffixIcon,
     required this.textEditingController,
+    required this.isEditing, // Nhận tham số isEditing
   });
 
   @override
@@ -280,7 +285,7 @@ class CustomTextformfield extends StatelessWidget {
           ),
           TextFormField(
             controller: textEditingController,
-            enabled: false,
+            enabled: isEditing, // Sử dụng biến isEditing
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: TextStyle(color: Colors.black),
@@ -298,18 +303,6 @@ class CustomTextformfield extends StatelessWidget {
                   width: 2.0,
                 ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15.0),
-                borderSide: BorderSide(
-                  color: Colors.blue,
-                  width: 2.0,
-                ),
-              ),
-              filled: true,
-              fillColor: Colors.white,
-              suffixIcon: suffixIcon,
-              contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
             ),
           ),
         ],

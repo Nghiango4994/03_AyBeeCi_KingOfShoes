@@ -22,16 +22,15 @@ class RegisterService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      // Đăng ký thành công
-      //final data = jsonDecode(response.body);
-      // Chuyển hướng đến màn hình đăng nhập
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Login_Screen()),
       );
     } else {
-      // Xử lý lỗi
-      throw Exception('Failed to register: ${response.body}');
+      // Thông báo email đã tồn tại rồi
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Email đã tồn tại rồi vui lòng nhập email khác!!!'),
+      ));
     }
   }
 }

@@ -1,4 +1,3 @@
-// lib/models/thong_tin.dart
 class ThongTin {
   int id;
   String? ten;
@@ -9,6 +8,7 @@ class ThongTin {
   String? matKhau;
   bool locked;
   bool isAdmin;
+  String? anh_user;
 
   ThongTin({
     required this.id,
@@ -20,22 +20,24 @@ class ThongTin {
     this.matKhau,
     this.locked = false,
     this.isAdmin = false,
+    this.anh_user,
   });
 
   // Phương thức từ JSON
   factory ThongTin.fromJson(Map<String, dynamic> json) {
     return ThongTin(
-      id: json['id'],
-      ten: json['ten'],
-      email: json['email'],
-      ngaySinh:
-          json['ngay_sinh'] != null ? DateTime.parse(json['ngay_sinh']) : null,
-      diaChi: json['dia_chi'],
-      sdt: json['sdt'],
-      matKhau: json['mat_khau'],
-      locked: json['locked'] == 1, // Chuyển đổi từ TINYINT(1)
-      isAdmin: json['isAdmin'] == 1, // Chuyển đổi từ TINYINT(1)
-    );
+        id: json['id'],
+        ten: json['ten'],
+        email: json['email'],
+        ngaySinh: json['ngay_sinh'] != null
+            ? DateTime.parse(json['ngay_sinh'])
+            : null,
+        diaChi: json['dia_chi'],
+        sdt: json['sdt'],
+        matKhau: json['mat_khau'],
+        locked: json['locked'] == 1, // Chuyển đổi từ TINYINT(1)
+        isAdmin: json['isAdmin'] == 1, // Chuyển đổi từ TINYINT(1)
+        anh_user: json['anh_user']);
   }
 
   // Phương thức chuyển đổi sang JSON
@@ -44,13 +46,13 @@ class ThongTin {
       'id': id,
       'ten': ten,
       'email': email,
-      'ngay_sinh':
-          ngaySinh?.toIso8601String(), // Chuyển đổi DateTime sang String
+      'ngay_sinh': ngaySinh?.toIso8601String(),
       'dia_chi': diaChi,
       'sdt': sdt,
       'mat_khau': matKhau,
-      'locked': locked ? 1 : 0, // Chuyển đổi từ bool sang TINYINT(1)
-      'isAdmin': isAdmin ? 1 : 0, // Chuyển đổi từ bool sang TINYINT(1)
+      'locked': locked ? 1 : 0,
+      'isAdmin': isAdmin ? 1 : 0,
+      'anh_user': anh_user
     };
   }
 }

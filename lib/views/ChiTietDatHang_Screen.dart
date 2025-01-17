@@ -2,40 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_button.dart';
 
-class ChiTietHoaDonScreen extends StatefulWidget {
+class ChiTietDatHangScreen extends StatefulWidget {
   @override
-  _ChiTietHoaDonScreenState createState() => _ChiTietHoaDonScreenState();
+  State<ChiTietDatHangScreen> createState() => _ChiTietDatHangScreenState();
 }
 
-class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
-  int _selectedProductQuantity = 2;
-  int _productPrice = 500000;
-  int _discountAmount = 10000;
-
+class _ChiTietDatHangScreenState extends State<ChiTietDatHangScreen> {
   @override
   Widget build(BuildContext context) {
     final numberFormat = NumberFormat('#,##0');
-
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.white,
         title: const Text(
-          "Chi tiết hóa đơn",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          "Chi Tiết Đặt Hàng",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         leading: IconButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            icon: Icon(Icons.arrow_back, color: Colors.white)),
+            icon: Icon(Icons.arrow_back)),
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            CustomButton(text: "Duyệt", onClick: () {}),
+            CustomButton(text: "Yêu cầu trả hàng", onClick: () {}),
           ],
         ),
       ),
@@ -62,20 +57,18 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Hóa đơn ID: HD12345",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         const Text("Tên khách hàng: Nguyễn Văn A",
             style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
         const Text("Ngày đặt: 15/01/2025", style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
-        const Text("Trạng thái: Chờ duyệt", style: TextStyle(fontSize: 16)),
+        const Text("Trạng thái: Đã thanh toán", style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
-        const Text("Hình thức thanh toán: Thẻ tín dụng",
+        const Text("Hình thức thanh toán: MoMo",
             style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
-        Text("Mã giảm giá: ${numberFormat.format(10000)} VND",
+        const Text("Mã giảm  giá: 10,000 VND",
             style: TextStyle(fontSize: 16)),
       ],
     );
@@ -92,7 +85,7 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
           border: TableBorder.all(color: Colors.grey),
           columnWidths: const {
             0: FlexColumnWidth(3),
-            1: FlexColumnWidth(2),
+            1: FlexColumnWidth(3),
             2: FlexColumnWidth(2),
             3: FlexColumnWidth(2),
             4: FlexColumnWidth(2),
@@ -100,7 +93,7 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
           children: [
             const TableRow(
               decoration: BoxDecoration(
-                color: Color.fromARGB(255, 240, 240, 240),
+                color: Color.fromARGB(255, 224, 224, 224),
               ),
               children: [
                 Padding(
@@ -140,55 +133,23 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
               ],
             ),
             // Dòng sản phẩm mẫu
-            TableRow(
+            const TableRow(
               children: [
-                Text("Giày thể thao"),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.remove,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          if (_selectedProductQuantity > 1) {
-                            _selectedProductQuantity--;
-                            _updateTotalAmount();
-                          }
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: Text("$_selectedProductQuantity",
-                          style: TextStyle(fontSize: 16)),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.add,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _selectedProductQuantity++;
-                          _updateTotalAmount();
-                        });
-                      },
-                    ),
-                  ],
+                Padding(
+                    padding: EdgeInsets.all(8.0), child: Text("Giày thể thao")),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text("2", textAlign: TextAlign.center),
                 ),
                 Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text(numberFormat.format(_productPrice) + " VND",
-                        textAlign: TextAlign.right)),
+                    child: Text("500,000 VND", textAlign: TextAlign.right)),
                 Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text("GIAM10", textAlign: TextAlign.center)),
                 Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text(
-                        numberFormat.format(_productPrice - _discountAmount) +
-                            " VND",
-                        textAlign: TextAlign.right)),
+                    child: Text("450,000 VND", textAlign: TextAlign.right)),
               ],
             ),
           ],
@@ -197,38 +158,22 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
     );
   }
 
-  void _updateTotalAmount() {
-    setState(() {
-      _buildTotalAmount(NumberFormat('#,##0'));
-      _buildTotalAfterDiscount(NumberFormat('#,##0'));
-    });
-  }
-
   Widget _buildTotalAmount(NumberFormat numberFormat) {
-    int totalAmount = _productPrice * _selectedProductQuantity;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        "Tổng cộng: ${numberFormat.format(totalAmount)} VND",
-        style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.red,
-            decoration: TextDecoration.lineThrough),
-      ),
+    return const Text(
+      "Tổng cộng: 1,000,000 VND",
+      style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.red,
+          decoration: TextDecoration.lineThrough),
     );
   }
 
   Widget _buildTotalAfterDiscount(NumberFormat numberFormat) {
-    int totalAmount =
-        (_productPrice - _discountAmount) * _selectedProductQuantity;
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
-      child: Text(
-        "Tổng giá sau giảm: ${numberFormat.format(totalAmount)} VND",
-        style: TextStyle(
-            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
-      ),
+    return const Text(
+      "Tổng giá sau giảm: 900,000 VND",
+      style: TextStyle(
+          fontSize: 18, fontWeight: FontWeight.bold, color: Colors.red),
     );
   }
 }
