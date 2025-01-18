@@ -21,14 +21,9 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
         backgroundColor: Colors.blue,
         title: const Text(
           "Chi tiết hóa đơn",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: Icon(Icons.arrow_back, color: Colors.white)),
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,

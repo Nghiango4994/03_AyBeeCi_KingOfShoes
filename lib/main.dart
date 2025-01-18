@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:kingofshoes/models/chi_tiet_hoa_don.dart';
 import 'package:kingofshoes/viewmodels/QuanLyHoaDon.dart';
+import 'package:kingofshoes/views/CheckOutScreens.dart';
 import 'package:kingofshoes/views/Home_Screen.dart';
+import 'package:kingofshoes/views/Login_Screen.dart';
+import 'package:kingofshoes/views/ProfileScreen.dart';
 import 'package:provider/provider.dart';
+import 'views/ChiTietHoaDon_Screens.dart';
 
 void main() {
   runApp(

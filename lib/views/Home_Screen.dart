@@ -63,6 +63,7 @@ class _HomeScreenState extends State<Home_Screen> {
             onPressed: () async {
               await viewModel.loadUserData();
               _scaffoldKey.currentState?.openDrawer();
+              _loadUserData();
             },
             icon: const Icon(Icons.menu),
           ),
