@@ -21,9 +21,12 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
         backgroundColor: Colors.blue,
         title: const Text(
           "Chi tiết hóa đơn",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        leading: IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.arrow_back, color: Colors.white)),
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
@@ -137,7 +140,8 @@ class _ChiTietHoaDonScreenState extends State<ChiTietHoaDonScreen> {
             // Dòng sản phẩm mẫu
             TableRow(
               children: [
-                Text("Giày thể thao"),
+                Padding(
+                    padding: EdgeInsets.all(8.0), child: Text("Giày thể thao")),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

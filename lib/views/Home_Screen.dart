@@ -11,6 +11,7 @@ import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:kingofshoes/views/Notification_Screen.dart';
 import 'package:kingofshoes/views/ProfileScreen.dart';
 import 'package:kingofshoes/views/QuanLyDatHang_Screen.dart';
+import 'package:kingofshoes/views/QuanLyDonHang.dart';
 import 'package:kingofshoes/views/SeeAll_Screen.dart';
 import 'package:kingofshoes/views/widgets/color_selector.dart';
 import 'package:kingofshoes/views/widgets/custom_widgets/custom_ButtonBrand.dart';
@@ -63,7 +64,7 @@ class _HomeScreenState extends State<Home_Screen> {
             onPressed: () async {
               await viewModel.loadUserData();
               _scaffoldKey.currentState?.openDrawer();
-              _loadUserData();
+              viewModel.loadUserData();
             },
             icon: const Icon(Icons.menu),
           ),
@@ -119,7 +120,7 @@ class _HomeScreenState extends State<Home_Screen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => QuanLyDatHangScreen()));
+                        builder: (context) => QuanLyDonHangScreen()));
               },
             ),
             const Divider(),
