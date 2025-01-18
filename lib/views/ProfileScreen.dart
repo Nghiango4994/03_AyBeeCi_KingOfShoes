@@ -124,7 +124,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       await _viewModel.updateUserData(updatedUser);
-      await LoginService.saveUserData(updatedUser.toJson());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Cập nhật thành công!')),
       );
@@ -223,7 +222,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 16),
               CustomTextformfield(
                 labelText: 'Số điện thoại',
-                hintText: '0123456789',
+                hintText: 'Số điện thoại của bạn',
                 textEditingController: _phoneController,
                 isEditing: _isEditing,
                 suffixIcon: null,

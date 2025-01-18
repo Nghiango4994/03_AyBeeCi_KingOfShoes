@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:kingofshoes/models/bien_the_san_pham.dart';
+import 'package:kingofshoes/models/thong_tin.dart';
 import 'package:kingofshoes/viewmodels/Home_ViewModel.dart';
 import 'package:kingofshoes/viewmodels/LoginService.dart';
 import 'package:kingofshoes/views/Cart_Screen.dart';
@@ -32,7 +33,6 @@ class _HomeScreenState extends State<Home_Screen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextEditingController _searchController = TextEditingController();
   int _selectedIndex = 0;
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -42,7 +42,7 @@ class _HomeScreenState extends State<Home_Screen> {
   @override
   void initState() {
     super.initState();
-    viewModel.loadUserData(); // Tải dữ liệu người dùng khi khởi tạo
+    LoginService.getUserData();
   }
 
   @override
@@ -64,7 +64,6 @@ class _HomeScreenState extends State<Home_Screen> {
             onPressed: () async {
               await viewModel.loadUserData();
               _scaffoldKey.currentState?.openDrawer();
-              viewModel.loadUserData();
             },
             icon: const Icon(Icons.menu),
           ),
