@@ -63,6 +63,7 @@ class _HomeScreenState extends State<Home_Screen> {
           child: IconButton(
             onPressed: () async {
               await viewModel.loadUserData();
+              await LoginService.getUserData();
               _scaffoldKey.currentState?.openDrawer();
             },
             icon: const Icon(Icons.menu),
@@ -93,9 +94,8 @@ class _HomeScreenState extends State<Home_Screen> {
                     ? MemoryImage(
                         base64Decode(viewModel.anh!)) // Hiển thị ảnh từ Base64
                     : null,
-                child: viewModel.anh == null
-                    ? Icon(Icons.camera_alt, size: 50)
-                    : null,
+                child:
+                    viewModel.anh == null ? Icon(Icons.person, size: 50) : null,
               ),
               decoration: BoxDecoration(
                 color: Colors.black,

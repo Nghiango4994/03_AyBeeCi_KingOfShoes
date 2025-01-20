@@ -177,9 +177,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
         leading: IconButton(
-            onPressed: () {
-              _loadUserData();
+            onPressed: () async {
               Navigator.pop(context);
+              await Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => Home_Screen()),
+              );
+              print("đã load lại trang");
             },
             icon: Icon(Icons.arrow_back)),
       ),

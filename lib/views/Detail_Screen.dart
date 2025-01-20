@@ -231,6 +231,11 @@ class _Detail_ScreenState extends State<Detail_Screen> {
                                       print(
                                           quantity); // Số lượng sản phẩm thực tế
                                       // Gọi phương thức thêm sản phẩm vào giỏ hàng
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  CartScreen()));
                                       await CartViewModel().addProductToCart(
                                         idSanPham,
                                         idKhachHang!,
@@ -238,11 +243,6 @@ class _Detail_ScreenState extends State<Detail_Screen> {
                                         quantity,
                                       ); // Truyền số lượng vào
                                       //Chuyển hướng sang trang giỏ hàng
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CartScreen()));
                                     } catch (e) {
                                       print('Error adding product to cart: $e');
                                     }

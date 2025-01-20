@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:kingofshoes/viewmodels/LoginService.dart';
 import 'package:kingofshoes/viewmodels/QuanLyHoaDon.dart';
 import 'package:kingofshoes/views/ChiTietHoaDon_Screens.dart';
+import 'package:kingofshoes/views/Login_Screen.dart';
 import 'package:provider/provider.dart';
 
 class QuanLyDonHangScreen extends StatefulWidget {
@@ -49,6 +51,16 @@ class _QuanLyDonHangScreenState extends State<QuanLyDonHangScreen> {
             color: Color.fromARGB(255, 255, 255, 255),
             fontWeight: FontWeight.bold,
             fontSize: 20),
+        leading: IconButton(
+            onPressed: () async {
+              await LoginService.clearUserData();
+              Navigator.pushReplacement(context,
+                  MaterialPageRoute(builder: (context) => Login_Screen()));
+            },
+            icon: Icon(
+              Icons.logout,
+              color: Colors.white,
+            )),
       ),
       body: Container(
         color: Colors.grey[200],
